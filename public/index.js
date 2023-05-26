@@ -190,7 +190,7 @@ class Product {
         document.querySelector(`#D${this.name}`).append(Size)
 
         const addInfo = document.createElement('textarea')
-        addInfo.placeholder = "Additional Info (100 chars max)"
+        addInfo.placeholder = "Remarks"
         addInfo.classList.add('add-info')
         document.querySelector(`#D${this.name}`).append(addInfo)
 
@@ -443,7 +443,6 @@ getProducts().then(products => {
         let currImage = image
         currImage.addEventListener('load', load)
         function load() {
-            let height, width
             if (image.naturalWidth > image.naturalHeight) {
                 width = document.documentElement.clientWidth * (80 / 100)
                 height = (image.naturalHeight / image.naturalWidth) * width
@@ -484,7 +483,7 @@ getProducts().then(products => {
             if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
             let nP = document.createElement('p')
             nP.classList.add('nP')
-            nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 12.5)}px;`
+            nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
             nP.innerText = `${images.indexOf(src)+1}/${images.length}`
             document.body.appendChild(nP)
             function touchMoveEvent(e) {
@@ -512,12 +511,32 @@ getProducts().then(products => {
                 index = images.indexOf(src)
                 nP.innerText = `${index+1}/${images.length}`
                 inX = null
-                newImage.classList.remove('images')
-                newImage.classList.add('bigImage')
-                newImage.width = width
-                newImage.height = height
                 close.insertAdjacentElement('beforebegin', newImage)
                 currImage = newImage
+                newImage.addEventListener('load', () => {
+                    let height, width
+                    if (newImage.naturalWidth > newImage.naturalHeight) {
+                        width = document.documentElement.clientWidth * (80 / 100)
+                        height = (newImage.naturalHeight / newImage.naturalWidth) * width
+                        if (height > document.documentElement.clientHeight) {
+                            height = document.documentElement.clientHeight * (85 / 100)
+                            width = (newImage.naturalWidth / newImage.naturalHeight) * height
+                        }
+                    } else {
+                        height = document.documentElement.clientHeight * (85 / 100)
+                        width = (newImage.naturalWidth / newImage.naturalHeight) * height
+                        if (width > document.documentElement.clientWidth) {
+                            width = document.documentElement.clientWidth * (80 / 100)
+                            height = (newImage.naturalHeight / newImage.naturalWidth) * width
+                        }
+                    }
+                    currImage.width = width
+                    currImage.height = height
+                    close.style = `position: fixed; left: ${(width + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) + 15)}px;`
+                    nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
+                })
+                newImage.classList.remove('images')
+                newImage.classList.add('bigImage')
                 newImage.addEventListener('touchstart', touchStartEvent, { passive: true })
                 newImage.addEventListener('touchmove', touchMoveEvent, { passive: true })
             }

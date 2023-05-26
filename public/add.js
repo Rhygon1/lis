@@ -28,7 +28,7 @@ function handleImageLoading(src) {
 
 document.querySelector('.remove').addEventListener('click', () => {
     document.querySelector('.canvases').firstChild.remove()
-    images.shift()
+    bigImages.shift()
 })
 
 let add = document.querySelector('.submit')
