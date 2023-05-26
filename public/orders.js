@@ -141,9 +141,9 @@ getOrders().then(orders => {
             nameD.append(amount)
 
             const nOfitems = document.createElement('div')
-            nOfitems.classList.add('numberOfItems')
+            nOfitems.classList.add('color')
             nOfitems.style = "margin: 10px;"
-            nOfitems.innerText = `Number of products: ${item.Quantity} 
+            nOfitems.innerText = `Color: ${item.Color} 
             Size: ${item.Size}`
             nameD.append(nOfitems)
 

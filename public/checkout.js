@@ -18,8 +18,8 @@ data.forEach((p, i) => {
     document.querySelector('.grid').append(el)
     if ((i + 3) % 6 == 0) {
         console.log(Number(p.split(' ')[0]))
-        total += (Number(p.split(' ')[0]) * Number(data[i - 1]))
-        el.innerText = (Number(p.split(' ')[0]) * Number(data[i - 1])) + " " + "CAD"
+        total += Number(p.split(' ')[0])
+        el.innerText = Number(p.split(' ')[0]) + " " + "CAD"
     }
     if ((i + 6) % 6 == 0 || (i + 4) % 6 == 0 || (i + 2) % 6 == 0) {
         order.push(p)
@@ -111,6 +111,7 @@ document.querySelector('.submit').addEventListener('click', async () => {
 
         document.querySelector('.name').value = ""
         input.value = ""
+        whatsapp.value = ""
     } else if(!iti.isValidNumber()) {
         Array.from(document.querySelectorAll('.res')).forEach(el => el.remove())
         el = document.createElement('p')

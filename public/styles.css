@@ -175,7 +175,7 @@ body {
 .button-11 {
   padding-bottom: 2px;
 }
-.number {
+.number, .color {
   width: 100px;
   height: 30px;
   margin: 10px;
@@ -394,7 +394,7 @@ body {
     width: 100%;
   }
   
-  .numberOfItems {
+  .colorOfItems {
     position: absolute;
     bottom: 25px;
     font-size: 9px;
@@ -479,9 +479,9 @@ body {
     margin: 10px;
     font-size: 10px;
   }
-  .number {
+  .number, .color {
     width: 45px;
-    height: 8px;
+    height: 14px;
     margin: 10px;
     font-size: 16px;
     position: absolute !important;

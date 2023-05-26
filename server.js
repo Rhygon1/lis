@@ -58,7 +58,7 @@ const orderSchema = new mongoose.Schema({
         Code: String,
         Description: String,
         Price: Number,
-        Quantity: Number,
+        Color: String,
         Type: String,
         Images: [String],
         Size: Number,
@@ -206,7 +206,7 @@ app.post('/order', async (req, res, next) => {
                 Code: item.Code,
                 Description: item.Description,
                 Price: item.Price,
-                Quantity: it[1],
+                Color: it[1],
                 Images: item.Images,
                 Size: Number(it[2]),
                 Remarks: it[3]

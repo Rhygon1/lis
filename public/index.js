@@ -78,10 +78,10 @@ function updCartB() {
         let code = title.split(' ')[title.split(' ').length - 1]
         let name = title.split(' ').slice(0, title.split(' ').length - 1).join(' ')
         let price = document.querySelector(`#${id} .card2 .amount`).innerHTML
-        let number = Number(document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[3].split('\nSize:')[0])
-        let size = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[4]
+        let color = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[1].split('\nSize:')[0]
+        let size = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[2]
         let remarks = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value.split('Remarks: ')[1]
-        details = [...details, code, name, number, price, size, remarks]
+        details = [...details, code, name, color, price, size, remarks]
     })
     document.querySelector('.cartNumber').innerText = (details.length) / 6
     localStorage.setItem('cartB', JSON.stringify(details))
@@ -172,9 +172,8 @@ class Product {
         document.querySelector(`#D${this.name}`).append(cart)
 
         const number = document.createElement('input')
-        number.classList.add('number')
-        number.placeholder = "No. of items"
-        number.type = "number"
+        number.classList.add('color')
+        number.placeholder = "Color"
         document.querySelector(`#D${this.name}`).append(number)
 
         const images = document.createElement('div')
@@ -206,14 +205,14 @@ class Product {
 }
 
 class cartItem {
-    constructor(title, name, description, amount, type, images, number, size, remarks) {
+    constructor(title, name, description, amount, type, images, color, size, remarks) {
         this.name = name
         this.description = description
         this.amount = amount
         this.type = type
         this.images = [...images]
         this.title = title
-        this.number = number
+        this.color = color
         this.size = size
         this.remarks = remarks
         this.imageElements = []
@@ -281,7 +280,7 @@ class cartItem {
 
         const amount = document.createElement('div')
         amount.classList.add('amount')
-        amount.innerText = this.amount + ` Total: ${Number(this.amount.split(' ')[0]) * Number(this.number)} CAD`
+        amount.innerText = this.amount
         document.querySelector(`#D${this.name}`).append(amount)
 
         const cart = document.createElement('button')
@@ -304,9 +303,9 @@ class cartItem {
         document.querySelector(`#D${this.name}`).append(images)
 
         const items = document.createElement('div')
-        items.classList.add('numberOfItems')
+        items.classList.add('colorOfItems')
         items.style = "margin: 10px;"
-        items.innerText = `Number of products: ${this.number}
+        items.innerText = `Color: ${this.color}
         Size: ${this.size}`
         document.querySelector(`#D${this.name}`).append(items)
 
@@ -611,16 +610,16 @@ getProducts().then(products => {
                 images = images.innerText
                 images = images.split(",")
                 properties.push(images)
-                let number = button.nextSibling.value
+                let color = button.nextSibling.value
                 let size = button.nextSibling.nextSibling.nextSibling.value
                 let remarks = button.nextSibling.nextSibling.nextSibling.nextSibling.value
-                if (number == "" || number < 1 || size < 1 || size == '' || remarks.length > 100 || size > 1000 || number > 1000) {
+                if (color == "" || size < 1 || size == '' || remarks.length > 100 || size > 1000 || color.length > 50) {
                     throw (console.error())
                 }
                 button.nextSibling.value = ""
                 button.nextSibling.nextSibling.nextSibling.value = ""
                 button.nextSibling.nextSibling.nextSibling.nextSibling.value = ""
-                properties.push(number)
+                properties.push(color)
                 properties.push(size)
                 function makeid() {
                     var text = "";
@@ -763,14 +762,14 @@ getProducts().then(products => {
                     })
                 })
             } catch (e) {
-                let number = button.nextSibling.value
+                let color = button.nextSibling.value
                 let size = button.nextSibling.nextSibling.nextSibling.value
                 if (button.nextSibling.nextSibling.nextSibling.nextSibling.value.length > 99) {
                     alert("You can only add 100 characters in additional info")
-                } else if (number > 999 || size > 999) {
-                    alert('Number and size cant be greater than 999')
+                } else if (color == '' || size > 999) {
+                    alert('You have to add a color and make sure the size is less than 999')
                 } else {
-                    alert("Please enter the size and number of items")
+                    alert("Please enter the size and color")
                 }
                 console.log(e)
             }
