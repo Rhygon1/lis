@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/add.css">
+</head>
+<body>
+    <div class="navigation-bar">
+            <a class="nav-button" href="/admin/add">
+              Add
+            </a>
+            <a class="nav-button" href="/admin/remove">
+              Remove
+            </a>
+            <a class="nav-button" href="/admin/orders">Orders</a>
+      </div>
+    <div class="add">
+        <div class="part">
+            <Input type="text" class="name" placeholder="Name of the item">
+        </div>
+        <div class="part">
+            <input type="number" class="price" placeholder="Price (CAD)">
+            <textarea placeholder="Sizes" class="sizes"></textarea>
+        </div>
+        <div class="part">
+            <textarea placeholder="Description" class="Description"></textarea>
+        </div>
+        <div class="part">
+            <label for="type">Type:</label>
+            <select name="type" id="type" class="type">
+                <option value="choose">Choose an option</option>
+                <option value="ladies-stitched-suits">Punjabi suits</option>
+                <option value="unstitched-suits">Unstitched suits</option>
+                <option value="sarees">Sarees</option>
+                <option value="lehenga">Lehenga</option>
+                <option value="indo-western">Indo western</option>
+                <option value="readymade-suits">Readymade Suits</option>
+            </select>
+        </div>
+        <div class="part">
+            <label for="file">
+                Add image
+                <input type='file' name="file" id="file" class="addimage" multiple></input>
+            </label>
+            <button class="remove">Remove last image</button>
+        </div>
+        <div class="canvases part"></div>
+        <button class="submit part">Add item</button>
+    </div>
+    <script src="/add.js"></script>
+</body>
+</html>
