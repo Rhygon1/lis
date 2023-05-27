@@ -300,7 +300,7 @@ body {
   transform: translate(-16%, -5%);
 }
 
-@media only screen and (max-width: 767px) and (orientation: portrait) {
+@media only screen and (min-height: 100vw) {
   .top {
     display: flex;
     margin-top: 0.3%;
