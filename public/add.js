@@ -1,28 +1,30 @@
 let inputfile = document.querySelector('.addimage');
 inputfile.addEventListener('change', (e) => {
-    Array.from(e.target.files).forEach(file => {
-        handleImageLoading(URL.createObjectURL(file))
+    Array.from(e.target.files).forEach((file, i) => {
+        handleImageLoading(URL.createObjectURL(file), i)
     })
 });
 
 let bigImages = []
 
-function handleImageLoading(src) {
+function handleImageLoading(src, i) {
     let canvas = document.createElement('canvas');
-    let bigImage = document.createElement('canvas');
+    let bigImage = document.createElement('canvas')
     let img = new Image;
     img.src = src
-    img.onload = () => {
         canvas.height = 300
         canvas.width = 220
-        bigImage.height = img.naturalHeight
-        bigImage.width = img.naturalWidth
-        let ctx2 = bigImage.getContext('2d')
-        ctx2.drawImage(img, 0, 0, bigImage.width, bigImage.height)
         bigImages.push(bigImage)
         let ctx = canvas.getContext('2d');
+        document.querySelector('.canvases').append(canvas)
+
+    img.onload = () => {
+        console.log(i)
+        let ctx2 = bigImages[i].getContext('2d')
+        bigImages[i].height = img.naturalHeight
+        bigImages[i].width = img.naturalWidth
+        ctx2.drawImage(img, 0, 0, bigImage.width, bigImage.height)
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        document.querySelector('.canvases').prepend(canvas)
     }
 }
 

@@ -8,6 +8,7 @@ const path = require('path')
 const fs = require('fs')
 const multer = require('multer')
 const dotenv = require('dotenv')
+const mongoose = require('mongoose')
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3")
 const crypto = require('crypto')
 dotenv.config()
@@ -35,7 +36,6 @@ const s3Client = new S3Client({
     }
 })
 
-const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
     Name: String,
     Code: String,
