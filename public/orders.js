@@ -12,8 +12,8 @@ async function getVisited(){
 
 let imageOpen = false
 
-getOrders().then(orders => {
-    orders.forEach(order => {
+getOrders().then(async orders => {
+    for(let order of orders) {
         let orderDiv = document.createElement('div')
         orderDiv.classList.add('order')
 
@@ -89,8 +89,15 @@ getOrders().then(orders => {
             imageContainer.style = "position: relative;"
             product.append(imageContainer)
 
+            let imgUrls = []
+            for(let url of item.Images){
+                let s = await fetch(url)
+                s = await s.json()
+                imgUrls.push(s.url)
+            }
+
             let img = new Image;
-            img.src = item.Images[0]
+            img.src = imgUrls[0]
             img.loading = 'lazy'
             img.classList.add('images')
             imageContainer.append(img)
@@ -132,7 +139,7 @@ getOrders().then(orders => {
             
             const images = document.createElement('div')
             images.style = "display: none;"
-            images.innerText = item.Images
+            images.innerText = imgUrls
             nameD.append(images)
 
             const amount = document.createElement('div')
@@ -158,7 +165,7 @@ getOrders().then(orders => {
         orderDiv.appendChild(items)
 
         document.querySelector('.orders').append(orderDiv)
-    })
+    }
 
     let containers = document.querySelectorAll('.container')
     let lefts = document.querySelectorAll('.left')

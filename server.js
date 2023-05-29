@@ -10,6 +10,7 @@ const multer = require('multer')
 const dotenv = require('dotenv')
 const mongoose = require('mongoose')
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3")
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const crypto = require('crypto')
 dotenv.config()
 let visited = Number(fs.readFileSync(path.join(__dirname, '/visited.txt'), 'utf8'))
@@ -84,13 +85,19 @@ app.get('/visit', (req, res) => [
 ])
 
 app.get('/images/:name', async (req, res) => {
-    let response = await s3Client.send(new GetObjectCommand({
-        Bucket: bucketName,
-        Key: req.params.name
-    }))
-    res.set('Content-Type', 'image/webp');
-    const imageStream = response.Body;
-    imageStream.pipe(res);
+    // let response = await s3Client.send(new GetObjectCommand({
+    //     Bucket: bucketName,
+    //     Key: req.params.name
+    // }))
+    let url = await getSignedUrl(
+        s3Client,
+        new GetObjectCommand({
+            Bucket: bucketName,
+            Key: req.params.name
+        }),
+        {expiresIn: 300}
+    )
+    res.json({url: url})
 })
 
 app.post('/images', upload.single('image'), async (req, res) => {
@@ -103,15 +110,6 @@ app.post('/images', upload.single('image'), async (req, res) => {
     }
 
     await s3Client.send(new PutObjectCommand(uploadParams));
-
-    // let url = await getSignedUrl(
-    //     s3Client,
-    //     new GetObjectCommand({
-    //         Bucket: bucketName,
-    //         Key: fileName
-    //     }),
-    //     {expiresIn: 3153600000}
-    // )
 
     res.json({ url: `/images/${fileName}` })
 })

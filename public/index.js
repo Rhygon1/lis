@@ -1,16 +1,19 @@
 const cartItems = document.querySelector('.cart-button')
-let data = localStorage.getItem("cart")
-if (data != null && data != "") {
-    cartItems.innerHTML = data
-    updCartB()
-    localStorage.setItem("cart", "")
-    console.log(data)
-}
 
 let visited = localStorage.getItem("visited")
 if (!visited) {
     localStorage.setItem('visited', "sdaisd")
     fetch('/visit', { method: 'POST' })
+}
+
+function makeid() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    for (var i = 0; i < 30; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
 }
 
 const pro = document.querySelectorAll('.product')
@@ -81,10 +84,10 @@ function updCartB() {
         let color = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[1].split('\nSize:')[0]
         let size = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[2]
         let remarks = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.value.split('Remarks: ')[1]
-        details = [...details, code, name, color, price, size, remarks]
+        details = [...details, (code), (name), (color), (price), (size), (remarks)]
     })
     document.querySelector('.cartNumber').innerText = (details.length) / 6
-    localStorage.setItem('cartB', JSON.stringify(details))
+    localStorage.setItem('cartB', btoa(JSON.stringify(details)))
 }
 
 class Product {
@@ -264,7 +267,7 @@ class cartItem {
         document.querySelector(`#${this.name}`).append(nameD)
 
         const name1 = document.createElement('div')
-        name1.innerText = this.title
+        name1.innerHTML = this.title
         name1.classList.add('title')
         document.querySelector(`#D${this.name}`).append(name1)
 
@@ -331,24 +334,58 @@ async function getProducts() {
     return products
 }
 
-getProducts().then(products => {
+getProducts().then(async products => {
     let codes = []
     let allProducts = {}
+    async function handleIntersection(entries, observer){
+        console.log('obs')
+        for(let entry of entries) {
+          if (entry.intersectionRatio > 0) {
+            let imgUrls = []
+            for(let i = 0; i<allProducts[entry.target.id].imageElements.length; i++) {
+                let el = allProducts[entry.target.id].imageElements[i]
+                let s = await fetch(allProducts[entry.target.id].images[i])
+                s = await s.json()
+                imgUrls.push(s.url)
+                el.src = s.url
+            }
+            entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
+            entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
+            observer.unobserve(entry.target);
+          }
+        };
+      };
+    const options = {
+        rootMargin: '900px',
+        threshold: 0.1
+      };
+    const observer = new IntersectionObserver(handleIntersection, options);
     products.forEach(p => {
         let prod = new Product(p.Name, p.Code, p.Description, p.Price, p.Type, p.Images, p.Sizes ? p.Sizes : '')
         prod.build()
         allProducts[p.Code] = prod
         codes.push(p.Code)
+        observer.observe(document.querySelector(`#${p.Code}`))
     })
-    let cartprods = Array.from(document.querySelectorAll('.product.cart-button .card'))
-    cartprods.forEach(prod => {
-        let id = prod.id
-        let title = document.querySelector(`#${id} .card2 .title`).innerHTML
-        let code = title.split(' ')[title.split(' ').length - 1]
-        if (!codes.includes(code)) {
-            prod.remove()
+    if(localStorage.getItem('cartB')){
+        let cartB = JSON.parse(atob(localStorage.getItem('cartB')))
+        let cartProds = []
+        for(let i = 0; i<cartB.length; i+=6){
+            cartProds.push([cartB[i], cartB[i+1], cartB[i+2], cartB[i+3], cartB[i+4], cartB[i+5]])
         }
-    })
+        cartProds.forEach(prod => {
+            let code = prod[0]
+            if (codes.includes(code)) {
+                let item = allProducts[code]
+                let id = makeid()
+                let n = new cartItem(prod[1] + ' ' +prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5])
+                n.build()
+                allProducts[id] = n
+                observer.observe(document.querySelector(`#${id}`))
+            }
+        })
+        updCartB()
+    }
     let containers = document.querySelectorAll('.container')
     let lefts = document.querySelectorAll('.left')
     let rights = document.querySelectorAll('.right')
@@ -384,7 +421,7 @@ getProducts().then(products => {
             let src = image.src
             if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
             let index = images.indexOf(src)
-            let code = imageDiv.nextSibling.firstChild.innerText.split(' ')[imageDiv.nextSibling.firstChild.innerText.split(' ').length - 1]
+            let code = imageDiv.parentElement.id
             if (index > 0) {
                 image.remove()
                 let n = allProducts[code].imageElements[index - 1].cloneNode()
@@ -410,7 +447,7 @@ getProducts().then(products => {
             let src = image.src
             if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
             let index = images.indexOf(src)
-            let code = imageDiv.nextSibling.firstChild.innerText.split(' ')[imageDiv.nextSibling.firstChild.innerText.split(' ').length - 1]
+            let code = imageDiv.parentElement.id
             console.log(index)
             if (index + 1 != images.length) {
                 image.remove()
@@ -474,7 +511,7 @@ getProducts().then(products => {
             };
             let images = im.parentElement.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(',')
             let inX = null
-            let code = im.parentElement.nextSibling.firstChild.innerText.split(' ')[im.parentElement.nextSibling.firstChild.innerText.split(' ').length - 1]
+            let code = im.parentElement.parentElement.id
             function touchStartEvent(e) {
                 inX = e.touches[0].clientX
             }
@@ -573,8 +610,8 @@ getProducts().then(products => {
             const textarea = document.createElement('textarea')
             textarea.readOnly = true
             textarea.classList.add('textarea')
-            let code = button.parentElement.previousSibling.innerText
-            textarea.value = allProducts[(code.split(' ')[code.split(' ').length - 1])].description.replace(/\r?\n/g, '\n')
+            let code = button.parentElement.parentElement.firstChild.innerText.split(' ')
+            textarea.value = allProducts[code[code.length-1]].description.replace(/\r?\n/g, '\n')
             discInContainer.appendChild(textarea)
             let closeDisc = new Image(30, 30)
             closeDisc.src = "https://i.ibb.co/71D7qCN/568140.png"
@@ -606,9 +643,7 @@ getProducts().then(products => {
                 properties.push(description)
                 let price = button.previousSibling.innerHTML
                 properties.push(price)
-                let images = button.nextSibling.nextSibling
-                images = images.innerText
-                images = images.split(",")
+                let images = allProducts[`${button.parentElement.parentElement.id}`].images
                 properties.push(images)
                 let color = button.nextSibling.value
                 let size = button.nextSibling.nextSibling.nextSibling.value
@@ -621,19 +656,12 @@ getProducts().then(products => {
                 button.nextSibling.nextSibling.nextSibling.nextSibling.value = ""
                 properties.push(color)
                 properties.push(size)
-                function makeid() {
-                    var text = "";
-                    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-                    for (var i = 0; i < 30; i++)
-                        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-                    return text;
-                }
                 let id = makeid()
+                console.log(images)
                 const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks)
                 ne.build()
                 allProducts[id] = ne
+                observer.observe(document.querySelector(`#${id}`))
                 updCartB()
                 containers = document.querySelectorAll('.container')
                 lefts = document.querySelectorAll(`#${id} .left`)
@@ -669,7 +697,7 @@ getProducts().then(products => {
                         let src = image.src
                         if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
                         let index = images.indexOf(src)
-                        let code = imageDiv.nextSibling.firstChild.innerText.split(' ')[imageDiv.nextSibling.firstChild.innerText.split(' ').length - 1]
+                        let code = imageDiv.parentElement.id
                         if (index > 0) {
                             image.remove()
                             let n = allProducts[code].imageElements[index - 1].cloneNode()
@@ -695,7 +723,7 @@ getProducts().then(products => {
                         let src = image.src
                         if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
                         let index = images.indexOf(src)
-                        let code = imageDiv.nextSibling.firstChild.innerText.split(' ')[imageDiv.nextSibling.firstChild.innerText.split(' ').length - 1]
+                        let code = imageDiv.parentElement.id
                         console.log(index)
                         if (index + 1 != images.length) {
                             image.remove()
@@ -741,8 +769,8 @@ getProducts().then(products => {
                         const textarea = document.createElement('textarea')
                         textarea.readOnly = true
                         textarea.classList.add('textarea')
-                        let code = button.parentElement.previousSibling.innerText
-                        textarea.value = allProducts[(code.split(' ')[code.split(' ').length - 1])].description.replace(/\r?\n/g, '\n')
+                        let code = button.parentElement.parentElement.firstChild.innerText.split(' ')
+                        textarea.value = allProducts[code[code.length-1]].description.replace(/\r?\n/g, '\n')
                         console.log('hi')
                         discInContainer.appendChild(textarea)
                         let closeDisc = new Image(30, 30)
@@ -777,9 +805,6 @@ getProducts().then(products => {
     })
 
     window.addEventListener("beforeunload", () => {
-        const div = document.querySelector('.product.cart-button')
-        const html = div.innerHTML
         updCartB()
-        localStorage.setItem("cart", html)
     })
 })

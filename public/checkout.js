@@ -1,14 +1,15 @@
 let orders = []
 let order = []
-let data = JSON.parse(localStorage.getItem('cartB'))
+let data = JSON.parse(atob(localStorage.getItem('cartB')))
 let total = 0
 let ordered = false
-data.forEach((p, i) => {
+data.forEach((dp, i) => {
+    p = decodeURIComponent(dp)
     let el;
     if((i + 1) % 6 != 0){
-        el = document.createElement('p')
+        el = document.createElement('div')
         el.classList.add('grid_item')
-        el.innerText = p
+        el.innerHTML = p
     } else {
         el = document.createElement('textarea')
         el.readOnly = true
