@@ -1,4 +1,5 @@
 const cartItems = document.querySelector('.cart-button')
+if(localStorage.getItem('cartB')) localStorage.setItem('cartB', btoa(localStorage.getItem('cartB')))
 
 let visited = localStorage.getItem("visited")
 if (!visited) {
