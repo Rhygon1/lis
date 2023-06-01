@@ -84,6 +84,18 @@ app.get('/visit', (req, res) => [
     res.send({ visited: visited })
 ])
 
+app.get('/search/', async (req, res) => {
+    let query = decodeURI(req.query.search)
+    let all = await model.find({Disabled: false}).exec()
+    let matches = []
+    for(let p of all){
+        if(p.Name.toLowerCase().includes(query)){
+            matches.push(p.Code)
+        }
+    }
+    res.send(matches.reverse())
+})
+
 app.get('/images/:name', async (req, res) => {
     // let response = await s3Client.send(new GetObjectCommand({
     //     Bucket: bucketName,

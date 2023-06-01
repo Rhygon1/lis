@@ -1,11 +1,36 @@
 const cartItems = document.querySelector('.cart-button')
-if(localStorage.getItem('cartB')) localStorage.setItem('cartB', btoa(localStorage.getItem('cartB')))
+try { let temp = JSON.parse(atob(localStorage.getItem('cartB'))) } catch { localStorage.removeItem('cartB') }
 
 let visited = localStorage.getItem("visited")
 if (!visited) {
     localStorage.setItem('visited', "sdaisd")
     fetch('/visit', { method: 'POST' })
 }
+
+let allProducts = {}
+async function handleIntersection(entries, observer) {
+    console.log('obs')
+    for (let entry of entries) {
+        if (entry.intersectionRatio > 0) {
+            let imgUrls = []
+            for (let i = 0; i < allProducts[entry.target.id].imageElements.length; i++) {
+                let el = allProducts[entry.target.id].imageElements[i]
+                let s = await fetch(allProducts[entry.target.id].images[i])
+                s = await s.json()
+                imgUrls.push(s.url)
+                el.src = s.url
+            }
+            entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
+            entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
+            observer.unobserve(entry.target);
+        }
+    };
+};
+const options = {
+    rootMargin: '900px',
+    threshold: 0.1
+};
+const observer = new IntersectionObserver(handleIntersection, options);
 
 function makeid() {
     var text = "";
@@ -17,12 +42,347 @@ function makeid() {
     return text;
 }
 
+function addArrowImage(le) {
+    const image = le.firstChild
+    const left = image.nextSibling
+    const right = left.nextSibling
+    left.classList.remove('hide')
+    right.classList.remove('hide')
+}
+
+function hideArrowImage(le) {
+    const image = le.firstChild
+    const left = image.nextSibling
+    const right = left.nextSibling
+    left.classList.add('hide')
+    right.classList.add('hide')
+}
+
+function handleLeftClick(left) {
+    if (imageOpen || discOpen) return
+    const imageDiv = left.parentElement
+    let image = imageDiv.firstChild
+    let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
+    images = images.innerText
+    images = images.split(",")
+    let src = image.src
+    if (src.includes(window.location.host)) src = src.split(window.location.host)[1]
+    let index = images.indexOf(src)
+    let code = imageDiv.parentElement.id
+    if (index > 0) {
+        image.remove()
+        let n = allProducts[code].imageElements[index - 1].cloneNode()
+        imageDiv.prepend(n)
+        n.addEventListener('click', () => { onImageClick(n) })
+    } else {
+        image.remove()
+        let n = allProducts[code].imageElements[images.length - 1].cloneNode()
+        imageDiv.prepend(n)
+        n.addEventListener('click', () => { onImageClick(n) })
+    }
+}
+
+function handleRightClick(right) {
+    if (imageOpen || discOpen) return
+    const imageDiv = right.parentElement
+    let image = imageDiv.firstChild
+    let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
+    images = images.innerText
+    images = images.split(",")
+    let src = image.src
+    if (src.includes(window.location.host)) src = src.split(window.location.host)[1]
+    let index = images.indexOf(src)
+    let code = imageDiv.parentElement.id
+    console.log(index)
+    if (index + 1 != images.length) {
+        image.remove()
+        let n = allProducts[code].imageElements[index + 1].cloneNode()
+        imageDiv.prepend(n)
+        n.addEventListener('click', () => { onImageClick(n) })
+    } else {
+        image.remove()
+        let n = allProducts[code].imageElements[0].cloneNode()
+        imageDiv.prepend(n)
+        n.addEventListener('click', () => { onImageClick(n) })
+    }
+}
+
+function handleRemoveClick(remove) {
+    let id = remove.parentElement.parentElement.id
+    let product = document.getElementById(id)
+    document.querySelector('.cart-button').removeChild(product)
+    updCartB()
+}
+
+function onImageClick(im) {
+    if (imageOpen || discOpen) return
+    let image = new Image
+    image.src = im.src
+    let currImage = image
+    currImage.addEventListener('load', load)
+    function load() {
+        if (image.naturalWidth > image.naturalHeight) {
+            width = document.documentElement.clientWidth * (80 / 100)
+            height = (image.naturalHeight / image.naturalWidth) * width
+            if (height > document.documentElement.clientHeight) {
+                height = document.documentElement.clientHeight * (85 / 100)
+                width = (image.naturalWidth / image.naturalHeight) * height
+            }
+        } else {
+            height = document.documentElement.clientHeight * (85 / 100)
+            width = (image.naturalWidth / image.naturalHeight) * height
+            if (width > document.documentElement.clientWidth) {
+                width = document.documentElement.clientWidth * (80 / 100)
+                height = (image.naturalHeight / image.naturalWidth) * width
+            }
+        }
+        image.width = width
+        image.height = height
+        image.classList.add('bigImage')
+        document.body.append(image)
+        let close = new Image(30, 30)
+        close.src = "https://i.ibb.co/71D7qCN/568140.png"
+        close.classList.add('close')
+        document.body.append(close)
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        close.style = `position: fixed; left: ${(width + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) + 15)}px;`
+        imageOpen = true
+        window.onscroll = function () {
+            window.scrollTo(scrollLeft, scrollTop);
+        };
+        let images = im.parentElement.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(',')
+        let inX = null
+        let code = im.parentElement.parentElement.id
+        function touchStartEvent(e) {
+            inX = e.touches[0].clientX
+        }
+        let src = currImage.src
+        if (src.includes(window.location.host)) src = src.split(window.location.host)[1]
+        let nP = document.createElement('p')
+        nP.classList.add('nP')
+        nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
+        nP.innerText = `${images.indexOf(src) + 1}/${images.length}`
+        document.body.appendChild(nP)
+        function touchMoveEvent(e) {
+            if (inX === null) return
+            currImage.remove()
+            let newImage;
+            let src = currImage.src
+            if (src.includes(window.location.host)) src = src.split(window.location.host)[1]
+            let index = images.indexOf(src)
+            if (e.touches[0].clientX > inX) {
+                if (index > 0) {
+                    newImage = allProducts[code].imageElements[index - 1].cloneNode()
+                } else {
+                    newImage = allProducts[code].imageElements[images.length - 1].cloneNode()
+                }
+            } else {
+                if (index + 1 != images.length) {
+                    newImage = allProducts[code].imageElements[index + 1].cloneNode()
+                } else {
+                    newImage = allProducts[code].imageElements[0].cloneNode()
+                }
+            }
+            src = newImage.src
+            if (src.includes(window.location.host)) src = src.split(window.location.host)[1]
+            index = images.indexOf(src)
+            nP.innerText = `${index + 1}/${images.length}`
+            inX = null
+            close.insertAdjacentElement('beforebegin', newImage)
+            currImage = newImage
+            newImage.addEventListener('load', () => {
+                let height, width
+                if (newImage.naturalWidth > newImage.naturalHeight) {
+                    width = document.documentElement.clientWidth * (80 / 100)
+                    height = (newImage.naturalHeight / newImage.naturalWidth) * width
+                    if (height > document.documentElement.clientHeight) {
+                        height = document.documentElement.clientHeight * (85 / 100)
+                        width = (newImage.naturalWidth / newImage.naturalHeight) * height
+                    }
+                } else {
+                    height = document.documentElement.clientHeight * (85 / 100)
+                    width = (newImage.naturalWidth / newImage.naturalHeight) * height
+                    if (width > document.documentElement.clientWidth) {
+                        width = document.documentElement.clientWidth * (80 / 100)
+                        height = (newImage.naturalHeight / newImage.naturalWidth) * width
+                    }
+                }
+                currImage.width = width
+                currImage.height = height
+                close.style = `position: fixed; left: ${(width + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) + 15)}px;`
+                nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
+            })
+            newImage.classList.remove('images')
+            newImage.classList.add('bigImage')
+            newImage.addEventListener('touchstart', touchStartEvent, { passive: true })
+            newImage.addEventListener('touchmove', touchMoveEvent, { passive: true })
+        }
+        image.addEventListener('touchstart', touchStartEvent, { passive: true })
+        image.addEventListener('touchmove', touchMoveEvent, { passive: true })
+        close.addEventListener('click', () => {
+            window.onscroll = function () { };
+            imageOpen = false
+            currImage.remove()
+            close.remove()
+            nP.remove()
+        })
+        currImage.removeEventListener('load', load)
+    }
+}
+
+function handleDiscClick(button) {
+    discOpen = true
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    window.onscroll = function () {
+        window.scrollTo(scrollLeft, scrollTop);
+    };
+    let discContainer = document.createElement('div')
+    discContainer.classList.add('discContainer')
+    let discInContainer = document.createElement('div')
+    discInContainer.classList.add('discInContainer')
+    const textarea = document.createElement('textarea')
+    textarea.readOnly = true
+    textarea.classList.add('textarea')
+    let code = button.parentElement.parentElement.firstChild.innerText.split(' ')
+    textarea.value = allProducts[code[code.length - 1]].description.replace(/\r?\n/g, '\n')
+    discInContainer.appendChild(textarea)
+    let closeDisc = new Image(30, 30)
+    closeDisc.src = "https://i.ibb.co/71D7qCN/568140.png"
+    closeDisc.classList.add('closeDisc')
+    discInContainer.appendChild(closeDisc)
+    closeDisc.addEventListener('click', () => {
+        discOpen = false
+        window.onscroll = function () { };
+        closeDisc.remove()
+        textarea.remove()
+        discInContainer.remove()
+        discContainer.remove()
+    })
+    discContainer.appendChild(discInContainer)
+    document.body.appendChild(discContainer)
+}
+
+function handleAddButton(button){
+    if (imageOpen || discOpen) return
+    try {
+        let properties = []
+        let title = button.previousSibling.previousSibling.previousSibling.innerText
+        properties.push(title)
+        let description = allProducts[`${title.split(' ')[title.split(' ').length - 1]}`].description
+        properties.push(description)
+        let price = button.previousSibling.innerHTML
+        properties.push(price)
+        let images = allProducts[`${button.parentElement.parentElement.id}`].images
+        properties.push(images)
+        let color = button.nextSibling.value
+        let size = button.nextSibling.nextSibling.nextSibling.value
+        let remarks = button.nextSibling.nextSibling.nextSibling.nextSibling.value
+        if (color == "" || size < 1 || size == '' || remarks.length > 100 || size > 1000 || color.length > 50) {
+            throw (console.error())
+        }
+        button.nextSibling.value = ""
+        button.nextSibling.nextSibling.nextSibling.value = ""
+        button.nextSibling.nextSibling.nextSibling.nextSibling.value = ""
+        properties.push(color)
+        properties.push(size)
+        let id = makeid()
+        console.log(images)
+        const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks)
+        ne.build()
+        allProducts[id] = ne
+        observer.observe(document.querySelector(`#${id}`))
+        updCartB()
+        containers = document.querySelectorAll(`#${id} .container`)
+        lefts = document.querySelectorAll(`#${id} .left`)
+        rights = document.querySelectorAll(`#${id} .right`)
+        images = document.querySelectorAll(`#${id} .images`)
+        removes = document.querySelectorAll(`#${id} .Remove`)
+        discButtons = document.querySelectorAll(`#${id} .discButton`)
+
+        containers.forEach(le => {
+            le.addEventListener("mouseover", () => { addArrowImage(le) })
+            le.addEventListener("mouseleave", () => { hideArrowImage(le) })
+        })
+
+        lefts.forEach(left => {
+            left.addEventListener("click", () => { handleLeftClick(left) })
+        })
+
+        rights.forEach(right => {
+            right.addEventListener("click", () => { handleRightClick(right) })
+        })
+
+        removes.forEach(remove => {
+            remove.addEventListener("click", () => { handleRemoveClick(remove) })
+        })
+
+        images.forEach(im => {
+            im.addEventListener('click', () => { onImageClick(im) })
+        })
+
+        discButtons.forEach(button => {
+            button.addEventListener('click', () => { handleDiscClick(button) })
+        })
+    } catch (e) {
+        let color = button.nextSibling.value
+        let size = button.nextSibling.nextSibling.nextSibling.value
+        if (button.nextSibling.nextSibling.nextSibling.nextSibling.value.length > 99) {
+            alert("You can only add 100 characters in additional info")
+        } else if (color == '' || size > 999) {
+            alert('You have to add a color and make sure the size is less than 999')
+        } else {
+            alert("Please enter the size and color")
+        }
+        console.log(e)
+    }
+}
+
 const pro = document.querySelectorAll('.product')
 const buttons = document.querySelectorAll('.nav-button')
 let imageOpen = false
 let discOpen = false
 
 let selected = "";
+
+async function search() {
+    let search = encodeURI(document.querySelector('.search').value.toLowerCase())
+    console.log(search)
+    if (!search) return
+    let res = await fetch(`/search?search=${search}`)
+    let products = await res.json()
+    Array.from(document.querySelectorAll('.product.searching .card')).forEach(p => {
+        p.remove()
+    })
+    products.forEach(p => {
+        let node = document.querySelector(`#${p}`).cloneNode(deep = true)
+
+        node.querySelector(`.container`).addEventListener("mouseover", () => { addArrowImage(node.querySelector(`.container`)) })
+        node.querySelector(`.container`).addEventListener("mouseleave", () => { hideArrowImage(node.querySelector(`.container`)) })
+        node.querySelector(`.left`).addEventListener("click", () => { handleLeftClick(node.querySelector(`.left`)) })
+        node.querySelector(`.right`).addEventListener("click", () => { handleRightClick(node.querySelector(`.right`)) })
+        node.querySelector(`.images`).addEventListener('click', () => { onImageClick(node.querySelector(`.images`)) })
+        node.querySelector(`.discButton`).addEventListener('click', () => { handleDiscClick(node.querySelector(`.discButton`)) })
+        node.querySelector(`.Add`).addEventListener('click', () => { handleAddButton(node.querySelector('.Add')) })
+        observer.observe(node)
+        document.querySelector('.product.searching').appendChild(node)
+    })
+    Array.from(document.querySelectorAll('.product')).forEach(p => {
+        console.log(p.id)
+        if (p.id == 'searching') {
+            p.classList.remove('hide')
+        } else {
+            selected = p.id
+            p.classList.add('hide')
+        }
+    })
+}
+
+document.querySelector('#searchform').addEventListener('submit', e => {
+    e.preventDefault()
+    search()
+})
 
 pro.forEach(product => {
     if (product.id == "ladies-stitched-suits") {
@@ -198,7 +558,7 @@ class Product {
         document.querySelector(`#D${this.name}`).append(addInfo)
 
         const availSizes = document.createElement('p')
-        if(this.sizes != ""){
+        if (this.sizes != "") {
             availSizes.innerText = 'Sizes: ' + this.sizes
         } else {
             availSizes.innerText = ""
@@ -337,30 +697,6 @@ async function getProducts() {
 
 getProducts().then(async products => {
     let codes = []
-    let allProducts = {}
-    async function handleIntersection(entries, observer){
-        console.log('obs')
-        for(let entry of entries) {
-          if (entry.intersectionRatio > 0) {
-            let imgUrls = []
-            for(let i = 0; i<allProducts[entry.target.id].imageElements.length; i++) {
-                let el = allProducts[entry.target.id].imageElements[i]
-                let s = await fetch(allProducts[entry.target.id].images[i])
-                s = await s.json()
-                imgUrls.push(s.url)
-                el.src = s.url
-            }
-            entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
-            entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
-            observer.unobserve(entry.target);
-          }
-        };
-      };
-    const options = {
-        rootMargin: '900px',
-        threshold: 0.1
-      };
-    const observer = new IntersectionObserver(handleIntersection, options);
     products.forEach(p => {
         let prod = new Product(p.Name, p.Code, p.Description, p.Price, p.Type, p.Images, p.Sizes ? p.Sizes : '')
         prod.build()
@@ -368,18 +704,18 @@ getProducts().then(async products => {
         codes.push(p.Code)
         observer.observe(document.querySelector(`#${p.Code}`))
     })
-    if(localStorage.getItem('cartB')){
+    if (localStorage.getItem('cartB')) {
         let cartB = JSON.parse(atob(localStorage.getItem('cartB')))
         let cartProds = []
-        for(let i = 0; i<cartB.length; i+=6){
-            cartProds.push([cartB[i], cartB[i+1], cartB[i+2], cartB[i+3], cartB[i+4], cartB[i+5]])
+        for (let i = 0; i < cartB.length; i += 6) {
+            cartProds.push([cartB[i], cartB[i + 1], cartB[i + 2], cartB[i + 3], cartB[i + 4], cartB[i + 5]])
         }
         cartProds.forEach(prod => {
             let code = prod[0]
             if (codes.includes(code)) {
                 let item = allProducts[code]
                 let id = makeid()
-                let n = new cartItem(prod[1] + ' ' +prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5])
+                let n = new cartItem(prod[1] + ' ' + prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5])
                 n.build()
                 allProducts[id] = n
                 observer.observe(document.querySelector(`#${id}`))
@@ -395,414 +731,34 @@ getProducts().then(async products => {
     let discButtons = document.querySelectorAll('.discButton')
 
     containers.forEach(le => {
-        le.addEventListener("mouseover", () => {
-            const image = le.firstChild
-            const left = image.nextSibling
-            const right = left.nextSibling
-            left.classList.remove('hide')
-            right.classList.remove('hide')
-        })
-        le.addEventListener("mouseleave", () => {
-            const image = le.firstChild
-            const left = image.nextSibling
-            const right = left.nextSibling
-            left.classList.add('hide')
-            right.classList.add('hide')
-        })
+        le.addEventListener("mouseover", () => { addArrowImage(le) })
+        le.addEventListener("mouseleave", () => { hideArrowImage(le) })
     })
 
     lefts.forEach(left => {
-        left.addEventListener("click", () => {
-            if (imageOpen || discOpen) return
-            const imageDiv = left.parentElement
-            let image = imageDiv.firstChild
-            let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
-            images = images.innerText
-            images = images.split(",")
-            let src = image.src
-            if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-            let index = images.indexOf(src)
-            let code = imageDiv.parentElement.id
-            if (index > 0) {
-                image.remove()
-                let n = allProducts[code].imageElements[index - 1].cloneNode()
-                imageDiv.prepend(n)
-                n.addEventListener('click', () => { onImageClick(n) })
-            } else {
-                image.remove()
-                let n = allProducts[code].imageElements[images.length - 1].cloneNode()
-                imageDiv.prepend(n)
-                n.addEventListener('click', () => { onImageClick(n) })
-            }
-        })
+        left.addEventListener("click", () => { handleLeftClick(left) })
     })
 
     rights.forEach(right => {
-        right.addEventListener("click", () => {
-            if (imageOpen || discOpen) return
-            const imageDiv = right.parentElement
-            let image = imageDiv.firstChild
-            let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
-            images = images.innerText
-            images = images.split(",")
-            let src = image.src
-            if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-            let index = images.indexOf(src)
-            let code = imageDiv.parentElement.id
-            console.log(index)
-            if (index + 1 != images.length) {
-                image.remove()
-                let n = allProducts[code].imageElements[index + 1].cloneNode()
-                imageDiv.prepend(n)
-                n.addEventListener('click', () => { onImageClick(n) })
-            } else {
-                image.remove()
-                let n = allProducts[code].imageElements[0].cloneNode()
-                imageDiv.prepend(n)
-                n.addEventListener('click', () => { onImageClick(n) })
-            }
-        })
+        right.addEventListener("click", () => { handleRightClick(right) })
     })
 
     removes.forEach(remove => {
-        remove.addEventListener("click", () => {
-            let id = remove.parentElement.parentElement.id
-            let product = document.getElementById(id)
-            document.querySelector('.cart-button').removeChild(product)
-            updCartB()
-        })
+        remove.addEventListener("click", () => { handleRemoveClick(remove) })
     })
 
-    function onImageClick(im) {
-        if (imageOpen || discOpen) return
-        let image = new Image
-        image.src = im.src
-        let currImage = image
-        currImage.addEventListener('load', load)
-        function load() {
-            if (image.naturalWidth > image.naturalHeight) {
-                width = document.documentElement.clientWidth * (80 / 100)
-                height = (image.naturalHeight / image.naturalWidth) * width
-                if (height > document.documentElement.clientHeight) {
-                    height = document.documentElement.clientHeight * (85 / 100)
-                    width = (image.naturalWidth / image.naturalHeight) * height
-                }
-            } else {
-                height = document.documentElement.clientHeight * (85 / 100)
-                width = (image.naturalWidth / image.naturalHeight) * height
-                if (width > document.documentElement.clientWidth) {
-                    width = document.documentElement.clientWidth * (80 / 100)
-                    height = (image.naturalHeight / image.naturalWidth) * width
-                }
-            }
-            image.width = width
-            image.height = height
-            image.classList.add('bigImage')
-            document.body.append(image)
-            let close = new Image(30, 30)
-            close.src = "https://i.ibb.co/71D7qCN/568140.png"
-            close.classList.add('close')
-            document.body.append(close)
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            close.style = `position: fixed; left: ${(width + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) + 15)}px;`
-            imageOpen = true
-            window.onscroll = function () {
-                window.scrollTo(scrollLeft, scrollTop);
-            };
-            let images = im.parentElement.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(',')
-            let inX = null
-            let code = im.parentElement.parentElement.id
-            function touchStartEvent(e) {
-                inX = e.touches[0].clientX
-            }
-            let src = currImage.src
-            if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-            let nP = document.createElement('p')
-            nP.classList.add('nP')
-            nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
-            nP.innerText = `${images.indexOf(src)+1}/${images.length}`
-            document.body.appendChild(nP)
-            function touchMoveEvent(e) {
-                if (inX === null) return
-                currImage.remove()
-                let newImage;
-                let src = currImage.src
-                if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-                let index = images.indexOf(src)
-                if (e.touches[0].clientX > inX) {
-                    if (index > 0) {
-                        newImage = allProducts[code].imageElements[index - 1].cloneNode()
-                    } else {
-                        newImage = allProducts[code].imageElements[images.length - 1].cloneNode()
-                    }
-                } else {
-                    if (index + 1 != images.length) {
-                        newImage = allProducts[code].imageElements[index + 1].cloneNode()
-                    } else {
-                        newImage = allProducts[code].imageElements[0].cloneNode()
-                    }
-                }
-                src = newImage.src
-                if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-                index = images.indexOf(src)
-                nP.innerText = `${index+1}/${images.length}`
-                inX = null
-                close.insertAdjacentElement('beforebegin', newImage)
-                currImage = newImage
-                newImage.addEventListener('load', () => {
-                    let height, width
-                    if (newImage.naturalWidth > newImage.naturalHeight) {
-                        width = document.documentElement.clientWidth * (80 / 100)
-                        height = (newImage.naturalHeight / newImage.naturalWidth) * width
-                        if (height > document.documentElement.clientHeight) {
-                            height = document.documentElement.clientHeight * (85 / 100)
-                            width = (newImage.naturalWidth / newImage.naturalHeight) * height
-                        }
-                    } else {
-                        height = document.documentElement.clientHeight * (85 / 100)
-                        width = (newImage.naturalWidth / newImage.naturalHeight) * height
-                        if (width > document.documentElement.clientWidth) {
-                            width = document.documentElement.clientWidth * (80 / 100)
-                            height = (newImage.naturalHeight / newImage.naturalWidth) * width
-                        }
-                    }
-                    currImage.width = width
-                    currImage.height = height
-                    close.style = `position: fixed; left: ${(width + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) + 15)}px;`
-                    nP.style = `position: fixed; right: ${(50 + ((document.documentElement.clientWidth - width) / 2)) - 15}px; top: ${(((window.innerHeight - height) / 2) - 13.5)}px;`
-                })
-                newImage.classList.remove('images')
-                newImage.classList.add('bigImage')
-                newImage.addEventListener('touchstart', touchStartEvent, { passive: true })
-                newImage.addEventListener('touchmove', touchMoveEvent, { passive: true })
-            }
-            image.addEventListener('touchstart', touchStartEvent, { passive: true })
-            image.addEventListener('touchmove', touchMoveEvent, { passive: true })
-            close.addEventListener('click', () => {
-                window.onscroll = function () { };
-                imageOpen = false
-                currImage.remove()
-                close.remove()
-                nP.remove()
-            })
-            currImage.removeEventListener('load', load)
-        }
-    }
-
     images.forEach(im => {
-        im.addEventListener('click', () => {
-            onImageClick(im)
-        })
+        im.addEventListener('click', () => { onImageClick(im) })
     })
 
     discButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            discOpen = true
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            window.onscroll = function () {
-                window.scrollTo(scrollLeft, scrollTop);
-            };
-            let discContainer = document.createElement('div')
-            discContainer.classList.add('discContainer')
-            let discInContainer = document.createElement('div')
-            discInContainer.classList.add('discInContainer')
-            const textarea = document.createElement('textarea')
-            textarea.readOnly = true
-            textarea.classList.add('textarea')
-            let code = button.parentElement.parentElement.firstChild.innerText.split(' ')
-            textarea.value = allProducts[code[code.length-1]].description.replace(/\r?\n/g, '\n')
-            discInContainer.appendChild(textarea)
-            let closeDisc = new Image(30, 30)
-            closeDisc.src = "https://i.ibb.co/71D7qCN/568140.png"
-            closeDisc.classList.add('closeDisc')
-            discInContainer.appendChild(closeDisc)
-            closeDisc.addEventListener('click', () => {
-                discOpen = false
-                window.onscroll = function () { };
-                closeDisc.remove()
-                textarea.remove()
-                discInContainer.remove()
-                discContainer.remove()
-            })
-            discContainer.appendChild(discInContainer)
-            document.body.appendChild(discContainer)
-        })
+        button.addEventListener('click', () => { handleDiscClick(button) })
     })
 
     const addButtons = document.querySelectorAll('.Add')
 
     addButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            if (imageOpen || discOpen) return
-            try {
-                let properties = []
-                let title = button.previousSibling.previousSibling.previousSibling.innerText
-                properties.push(title)
-                let description = allProducts[`${title.split(' ')[title.split(' ').length - 1]}`].description
-                properties.push(description)
-                let price = button.previousSibling.innerHTML
-                properties.push(price)
-                let images = allProducts[`${button.parentElement.parentElement.id}`].images
-                properties.push(images)
-                let color = button.nextSibling.value
-                let size = button.nextSibling.nextSibling.nextSibling.value
-                let remarks = button.nextSibling.nextSibling.nextSibling.nextSibling.value
-                if (color == "" || size < 1 || size == '' || remarks.length > 100 || size > 1000 || color.length > 50) {
-                    throw (console.error())
-                }
-                button.nextSibling.value = ""
-                button.nextSibling.nextSibling.nextSibling.value = ""
-                button.nextSibling.nextSibling.nextSibling.nextSibling.value = ""
-                properties.push(color)
-                properties.push(size)
-                let id = makeid()
-                console.log(images)
-                const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks)
-                ne.build()
-                allProducts[id] = ne
-                observer.observe(document.querySelector(`#${id}`))
-                updCartB()
-                containers = document.querySelectorAll('.container')
-                lefts = document.querySelectorAll(`#${id} .left`)
-                rights = document.querySelectorAll(`#${id} .right`)
-                images = document.querySelectorAll(`#${id} .images`)
-                removes = document.querySelectorAll(`#${id} .Remove`)
-                discButtons = document.querySelectorAll(`#${id} .discButton`)
-                containers.forEach(le => {
-                    le.addEventListener("mouseover", () => {
-                        const image = le.firstChild
-                        const left = image.nextSibling
-                        const right = left.nextSibling
-                        left.classList.remove('hide')
-                        right.classList.remove('hide')
-                    })
-                    le.addEventListener("mouseleave", () => {
-                        const image = le.firstChild
-                        const left = image.nextSibling
-                        const right = left.nextSibling
-                        left.classList.add('hide')
-                        right.classList.add('hide')
-                    })
-                })
-
-                lefts.forEach(left => {
-                    left.addEventListener("click", () => {
-                        if (imageOpen || discOpen) return
-                        const imageDiv = left.parentElement
-                        let image = imageDiv.firstChild
-                        let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
-                        images = images.innerText
-                        images = images.split(",")
-                        let src = image.src
-                        if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-                        let index = images.indexOf(src)
-                        let code = imageDiv.parentElement.id
-                        if (index > 0) {
-                            image.remove()
-                            let n = allProducts[code].imageElements[index - 1].cloneNode()
-                            imageDiv.prepend(n)
-                            n.addEventListener('click', () => { onImageClick(n) })
-                        } else {
-                            image.remove()
-                            let n = allProducts[code].imageElements[images.length - 1].cloneNode()
-                            imageDiv.prepend(n)
-                            n.addEventListener('click', () => { onImageClick(n) })
-                        }
-                    })
-                })
-
-                rights.forEach(right => {
-                    right.addEventListener("click", () => {
-                        if (imageOpen || discOpen) return
-                        const imageDiv = right.parentElement
-                        let image = imageDiv.firstChild
-                        let images = imageDiv.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling
-                        images = images.innerText
-                        images = images.split(",")
-                        let src = image.src
-                        if(src.includes(window.location.host)) src = src.split(window.location.host)[1]
-                        let index = images.indexOf(src)
-                        let code = imageDiv.parentElement.id
-                        console.log(index)
-                        if (index + 1 != images.length) {
-                            image.remove()
-                            let n = allProducts[code].imageElements[index + 1].cloneNode()
-                            imageDiv.prepend(n)
-                            n.addEventListener('click', () => { onImageClick(n) })
-                        } else {
-                            image.remove()
-                            let n = allProducts[code].imageElements[0].cloneNode()
-                            imageDiv.prepend(n)
-                            n.addEventListener('click', () => { onImageClick(n) })
-                        }
-                    })
-                })
-
-                removes.forEach(remove => {
-                    remove.addEventListener("click", () => {
-                        let id = remove.parentElement.parentElement.id
-                        let product = document.getElementById(id)
-                        document.querySelector('.cart-button').removeChild(product)
-                        updCartB()
-                    })
-                })
-
-                images.forEach(im => {
-                    im.addEventListener('click', () => {
-                        onImageClick(im)
-                    })
-                })
-
-                discButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        discOpen = true
-                        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        let scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-                        window.onscroll = function () {
-                            window.scrollTo(scrollLeft, scrollTop);
-                        };
-                        let discContainer = document.createElement('div')
-                        discContainer.classList.add('discContainer')
-                        let discInContainer = document.createElement('div')
-                        discInContainer.classList.add('discInContainer')
-                        const textarea = document.createElement('textarea')
-                        textarea.readOnly = true
-                        textarea.classList.add('textarea')
-                        let code = button.parentElement.parentElement.firstChild.innerText.split(' ')
-                        textarea.value = allProducts[code[code.length-1]].description.replace(/\r?\n/g, '\n')
-                        console.log('hi')
-                        discInContainer.appendChild(textarea)
-                        let closeDisc = new Image(30, 30)
-                        closeDisc.src = "https://i.ibb.co/71D7qCN/568140.png"
-                        closeDisc.classList.add('closeDisc')
-                        discInContainer.appendChild(closeDisc)
-                        closeDisc.addEventListener('click', () => {
-                            discOpen = false
-                            window.onscroll = function () { };
-                            closeDisc.remove()
-                            textarea.remove()
-                            discInContainer.remove()
-                            discContainer.remove()
-                        })
-                        discContainer.appendChild(discInContainer)
-                        document.body.appendChild(discContainer)
-                    })
-                })
-            } catch (e) {
-                let color = button.nextSibling.value
-                let size = button.nextSibling.nextSibling.nextSibling.value
-                if (button.nextSibling.nextSibling.nextSibling.nextSibling.value.length > 99) {
-                    alert("You can only add 100 characters in additional info")
-                } else if (color == '' || size > 999) {
-                    alert('You have to add a color and make sure the size is less than 999')
-                } else {
-                    alert("Please enter the size and color")
-                }
-                console.log(e)
-            }
-        })
+        button.addEventListener("click", () => {handleAddButton(button)})
     })
 
     window.addEventListener("beforeunload", () => {
