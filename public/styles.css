@@ -561,8 +561,8 @@ body {
     grid-column: 1 / 1;
   }
   .checkout-button {
-    height: 20px;
-    width: 60px;
+    height: 30px;
+    width:130px;
     border: none;
     font-size: 10px;
   }

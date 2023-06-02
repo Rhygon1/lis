@@ -439,7 +439,7 @@ function updCartB() {
     elms.forEach(elm => {
         let id = elm.id
         let title = document.querySelector(`#${id} .card2 .title`).innerHTML
-        let code = title.split(' ')[title.split(' ').length - 1]
+        let code = title.split(' ')[title.split(' ').length - 1].slice(0, 12)
         let name = title.split(' ').slice(0, title.split(' ').length - 1).join(' ')
         let price = document.querySelector(`#${id} .card2 .amount`).innerHTML
         let color = document.querySelector(`#${id} .card2`).firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText.split(' ')[1].split('\nSize:')[0]
@@ -530,7 +530,7 @@ class Product {
 
         const cart = document.createElement('button')
         cart.style = "margin: 10px;"
-        cart.innerText = "Add to cart"
+        cart.innerText = "Wishlist"
         cart.classList.add("Add")
         cart.id = this.name
         document.querySelector(`#D${this.name}`).append(cart)
@@ -649,7 +649,7 @@ class cartItem {
 
         const cart = document.createElement('button')
         cart.style = "margin: 10px; display: none;"
-        cart.innerText = "Add to cart"
+        cart.innerText = "Wishlist"
         cart.classList.add("Add")
         cart.id = this.name
         document.querySelector(`#D${this.name}`).append(cart)
