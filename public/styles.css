@@ -320,7 +320,7 @@ body {
   width: 20%;
   position: absolute;
   font-weight: 600;
-  top: 5%;
+  top: 4%;
   left: 16%;
   transform: translate(-16%, -5%);
 }
@@ -334,7 +334,7 @@ body {
   }
   .top {
     display: flex;
-    margin-top: 0.3%;
+    margin-top: 1%;
     justify-content: space-around;
     margin-bottom: 5%;
   }
@@ -579,23 +579,26 @@ body {
     display: flex;
     justify-content: space-evenly;
     width: 15vw;
+    /* height: 15vw; */
   }
   .callImages {
     position: absolute;
-    top: 9%;
-    left: 79%;
+    top: 7%;;
+    left: 110%;
     transform: translate(-79%, -9%);
+    width: 200px;
   }
   .callImg {
-    width: 15%;
+    width: 20px;
   }
   .call_number {
+    text-align: right;
     width: 20%;
     position: absolute;
     font-weight: 600;
-    top: 8%;
-    left: 97%;
+    top: 10%;
+    left: 83%;
     transform: translate(-97%, -8%);
-    font-size: 7pt;
+    font-size: 5.8pt;
   }
 }
