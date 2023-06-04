@@ -584,9 +584,9 @@ body {
   .callImages {
     position: absolute;
     top: 7%;;
-    left: 110%;
+    left: 85%;
     transform: translate(-79%, -9%);
-    width: 200px;
+    width: 80px;
   }
   .callImg {
     width: 20px;
