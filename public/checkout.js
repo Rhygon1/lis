@@ -20,7 +20,7 @@ data.forEach((dp, i) => {
     if ((i + 3) % 6 == 0) {
         console.log(Number(p.split(' ')[0]))
         total += Number(p.split(' ')[0])
-        el.innerText = Number(p.split(' ')[0]) + " " + "CAD"
+        el.innerText = Number(p.split(' ')[0]) + " " + (localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
     }
     if ((i + 6) % 6 == 0 || (i + 4) % 6 == 0 || (i + 2) % 6 == 0) {
         order.push(p)
@@ -54,7 +54,7 @@ document.querySelector('.grid').append(el)
 
 el = document.createElement('p')
 el.classList.add('grid_item')
-el.innerText = total + ' ' + 'CAD'
+el.innerText = total + ' ' + (localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
 document.querySelector('.grid').append(el)
 
 var input = document.querySelector(".tel");

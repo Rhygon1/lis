@@ -1,11 +1,31 @@
 const cartItems = document.querySelector('.cart-button')
 try { let temp = JSON.parse(atob(localStorage.getItem('cartB'))) } catch { localStorage.removeItem('cartB') }
+localStorage.setItem('curr', localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
+if(localStorage.getItem('curr')){
+    document.querySelector('.curr').value = localStorage.getItem('curr')
+}
 
 let visited = localStorage.getItem("visited")
 if (!visited) {
     localStorage.setItem('visited', "sdaisd")
     fetch('/visit', { method: 'POST' })
 }
+
+document.querySelector('.curr').onchange = e => {
+    localStorage.setItem('curr', e.target.value)
+    changeCurr()
+}
+
+function changeCurr(){
+    let a = {'CAD': 0, 'USD': 1, 'GBP': 2}
+
+    let cards = Array.from(document.querySelectorAll('.card'))
+    cards.forEach(card => {
+        let amnt = card.querySelector('.amount')
+        amnt.textContent = allProducts[card.id].amounts[a[localStorage.getItem('curr')]] + ' ' + localStorage.getItem('curr')
+    })
+}
+
 
 let allProducts = {}
 async function handleIntersection(entries, observer) {
@@ -453,6 +473,7 @@ function updCartB() {
 
 class Product {
     constructor(title, name, description, amount, type, images, sizes) {
+        amount = Number(amount)
         this.name = name
         this.description = description
         this.amount = amount
@@ -461,6 +482,7 @@ class Product {
         this.title = title
         this.sizes = sizes
         this.imageElements = []
+        this.amounts = [Math.round(amount), Math.round(amount*0.75), Math.round(amount*0.6)]
     }
 
     build() {
@@ -580,6 +602,18 @@ class cartItem {
         this.size = size
         this.remarks = remarks
         this.imageElements = []
+
+        this.amounts = [0, 0, 0]
+        let a = {'CAD': '0', 'USD': '1', 'GBP': '2'}
+        let t = a[this.amount.split(' ')[1]]
+        let val = Number(this.amount.split(' ')[0])
+        if(t == '0'){
+            this.amounts = [Math.round(val), Math.round(val*0.75), Math.round(val*0.6)]
+        } else if (t == '1'){
+            this.amounts = [Math.round(val*1.34), Math.round(val), Math.round(val*0.8)]
+        } else {
+            this.amounts = [Math.round(val*1.67), Math.round(val*1.24), Math.round(val)]
+        }
     }
 
     build() {
@@ -760,6 +794,7 @@ getProducts().then(async products => {
     addButtons.forEach(button => {
         button.addEventListener("click", () => {handleAddButton(button)})
     })
+    changeCurr()
 
     window.addEventListener("beforeunload", () => {
         updCartB()

@@ -221,6 +221,17 @@ body {
   position: absolute !important;
   top: 253px;
 }
+.curr{
+  margin: 10px;
+  position: absolute;
+  background: none;
+  border: none;
+  /* appearance: none; */
+  padding: 7px;
+}
+.curr option{
+  -webkit-appearance: none;
+}
 .Remove:hover {
   background-color: rgb(198, 67, 222);
 }
