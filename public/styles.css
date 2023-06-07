@@ -29,7 +29,7 @@ body {
   top: -10px;
   position: absolute;
   overflow-x: hidden;
-  animation: move 10s linear infinite;
+  animation: move 30s linear infinite;
   animation-fill-mode: forwards; /* Retain the end state after animation */
 }
 
@@ -51,7 +51,7 @@ body {
   top: -10px;
   position: absolute;
   overflow-x: hidden;
-  animation: move1 10s linear infinite;
+  animation: move1 30s linear infinite;
   animation-fill-mode: forwards; /* Retain the end state after animation */
 }
 
