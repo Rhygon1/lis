@@ -225,8 +225,11 @@ body {
   margin: 10px;
   position: absolute;
   background: none;
-  border: none;
+  border: 0px solid white;
+  right: 0px;
+  color: black;
   /* appearance: none; */
+  font-size: 11px;
   padding: 7px;
 }
 .curr option{
