@@ -103,7 +103,7 @@ app.get('/search/', async (req, res) => {
     let all = await model.find({Disabled: false}).exec()
     let matches = []
     for(let p of all){
-        if((p.Name.toLowerCase() + p.Description.toLowerCase()).includes(query)){
+        if((p.Name.toLowerCase() + p.Description.toLowerCase() + p.Code.toLowerCase()).includes(query)){
             matches.push(p.Code)
         }
     }
