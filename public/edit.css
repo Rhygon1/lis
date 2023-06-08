@@ -29,12 +29,13 @@ body {
 }
 
 .main{
+    width: 100vw;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-input, textarea, button{
+.code, .submit, .confirm, .remove, .removeImage{
     margin: 5%;
     border: 2px solid black;
     border-radius: 25px;
@@ -42,9 +43,37 @@ input, textarea, button{
     width: 20vw;
 }
 
+.cont {
+    width: 90vw;
+    border: 2px green solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title{
+
+}
+
+.imgCont{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.img{
+    height: 330px;
+    width: 240px;
+}
+
 @media only screen and (max-width: 600px) {
     * {
       overflow-x: hidden;
       font-size: 10px;
     }
+    .img {
+      width: 33.33%;
+      height: 140px;
+    }
 }
+

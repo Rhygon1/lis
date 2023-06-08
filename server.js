@@ -73,6 +73,20 @@ mongoose.connect('mongodb+srv://Dhruv:gilbert130@cluster0.rcpc7.mongodb.net/Rese
     .then(() => model.find({}).exec())
     .then(() => server.listen(PORT))
 
+app.get('/product/:id', async (req, res) => {
+    let p = await model.find({ Disabled: false, Code: req.params.id })
+    if(p.length > 0) {
+        res.json(p[0])
+    } else {
+        res.send({'Code': 'Not found'})
+    }
+})
+
+app.post('/update', async (req, res) => {
+    let images = req.body.Images.split(',')
+    await model.updateOne({Code: req.body.Code}, {Images: images})
+})
+
 app.post('/visit', (req, res) => {
     visited += 1
     res.send('ok')
@@ -139,8 +153,8 @@ app.get('/admin/add', (req, res) => {
     res.sendFile(path.join(__dirname, path.join('public', 'add.html')))
 })
 
-app.get('/admin/remove', (req, res) => {
-    res.sendFile(path.join(__dirname, path.join('public', 'remove.html')))
+app.get('/admin/edit', (req, res) => {
+    res.sendFile(path.join(__dirname, path.join('public', 'edit.html')))
 })
 
 app.get('/admin/orders', (req, res) => {
@@ -244,41 +258,3 @@ app.delete('/order', (req, res) => {
         .then(console.log)
     res.send('ok')
 })
-
-// let n = {
-//     Name: 'fad',
-//     Number: 'sdas',
-//     OrderNo: 'sdhauhs',
-//     Items: [
-//         {
-//             Name: "sarees",
-//             Code: "as",
-//             Description: `karigari by DKH K199 Premium cotton beautifully printed full flare anarkali paired up with lehriya dupatta with gotta lace detailing on suit.. Sizes 38 to 46*`,
-//             Price: 1750,
-//             Quanitity: 2,
-//             Type: "sarees",
-//             Images: ["https://images.pexels.com/photos/268533/pexels-photo-268533.jpeg?cs=srgb&dl=pexels-pixabay-268533.jpg&fm=jpg", "https://img.freepik.com/free-photo/landscape-with-night-starry-sky-silhouette-tree-hill-milky-way-with-lonely-tree-falling-stars_146671-14048.jpg?w=2000", "https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8fA%3D%3D&w=1000&q=80"]
-//         },
-//         {
-//             Name: "sarees",
-//             Code: "as",
-//             Description: `karigari by DKH K199 Premium cotton beautifully printed full flare anarkali paired up with lehriya dupatta with gotta lace detailing on suit.. Sizes 38 to 46*`,
-//             Price: 1750,
-//             Quanitity: 2,
-//             Type: "sarees",
-//             Images: ["https://images.pexels.com/photos/268533/pexels-photo-268533.jpeg?cs=srgb&dl=pexels-pixabay-268533.jpg&fm=jpg", "https://img.freepik.com/free-photo/landscape-with-night-starry-sky-silhouette-tree-hill-milky-way-with-lonely-tree-falling-stars_146671-14048.jpg?w=2000", "https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8fA%3D%3D&w=1000&q=80"]
-//         }
-//     ]
-// }
-// order.create(n).then(console.log)
-// model.deleteMany({}).then(console.log)
-// let n = {
-//     Name: "sarees",
-//     Code: "as",
-//     Description: `karigari by DKH K199 Premium cotton beautifully printed full flare anarkali paired up with lehriya dupatta with gotta lace detailing on suit.. Sizes 38 to 46*`,
-//     Price: 1750,
-//     Type: "sarees",
-//     Images: ["https://images.pexels.com/photos/268533/pexels-photo-268533.jpeg?cs=srgb&dl=pexels-pixabay-268533.jpg&fm=jpg", "https://img.freepik.com/free-photo/landscape-with-night-starry-sky-silhouette-tree-hill-milky-way-with-lonely-tree-falling-stars_146671-14048.jpg?w=2000", "https://images.unsplash.com/photo-1495344517868-8ebaf0a2044a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8fA%3D%3D&w=1000&q=80"]
-// }
-// model.create(n).then(console.log)
-

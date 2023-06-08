@@ -309,7 +309,7 @@ function handleAddButton(button){
         properties.push(size)
         let id = makeid()
         console.log(images)
-        const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks)
+        const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks, allProducts[`${title.split(' ')[title.split(' ').length - 1]}`].amounts)
         ne.build()
         allProducts[id] = ne
         observer.observe(document.querySelector(`#${id}`))
@@ -591,7 +591,7 @@ class Product {
 }
 
 class cartItem {
-    constructor(title, name, description, amount, type, images, color, size, remarks) {
+    constructor(title, name, description, amount, type, images, color, size, remarks, amounts) {
         this.name = name
         this.description = description
         this.amount = amount
@@ -602,18 +602,18 @@ class cartItem {
         this.size = size
         this.remarks = remarks
         this.imageElements = []
-
-        this.amounts = [0, 0, 0]
-        let a = {'CAD': '0', 'USD': '1', 'GBP': '2'}
-        let t = a[this.amount.split(' ')[1]]
-        let val = Number(this.amount.split(' ')[0])
-        if(t == '0'){
-            this.amounts = [Math.round(val), Math.round(val*0.75), Math.round(val*0.6)]
-        } else if (t == '1'){
-            this.amounts = [Math.round(val*1.34), Math.round(val), Math.round(val*0.8)]
-        } else {
-            this.amounts = [Math.round(val*1.67), Math.round(val*1.24), Math.round(val)]
-        }
+        this.amounts = amounts
+        // this.amounts = [0, 0, 0]
+        // let a = {'CAD': '0', 'USD': '1', 'GBP': '2'}
+        // let t = a[this.amount.split(' ')[1]]
+        // let val = Number(this.amount.split(' ')[0])
+        // if(t == '0'){
+        //     this.amounts = [Math.round(val), Math.round(val*0.75), Math.round(val*0.6)]
+        // } else if (t == '1'){
+        //     this.amounts = [Math.round(val*1.34), Math.round(val), Math.round(val*0.8)]
+        // } else {
+        //     this.amounts = [Math.round(val*1.67), Math.round(val*1.24), Math.round(val)]
+        // }
     }
 
     build() {
@@ -749,7 +749,7 @@ getProducts().then(async products => {
             if (codes.includes(code)) {
                 let item = allProducts[code]
                 let id = makeid()
-                let n = new cartItem(prod[1] + ' ' + prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5])
+                let n = new cartItem(prod[1] + ' ' + prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5], item.amounts)
                 n.build()
                 allProducts[id] = n
                 observer.observe(document.querySelector(`#${id}`))
