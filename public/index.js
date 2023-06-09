@@ -558,6 +558,43 @@ async function search() {
             observer.unobserve(node)
         }
         node = node.cloneNode(deep = true)
+        let containers = node.querySelectorAll(`.container`)
+        let lefts = node.querySelectorAll(`.left`)
+        let rights = node.querySelectorAll(`.right`)
+        let removes = node.querySelectorAll(`.Remove`)
+        let i = node.querySelectorAll(`.images`)
+        let discButtons = node.querySelectorAll(`.discButton`)
+
+        containers.forEach(le => {
+            le.addEventListener("mouseover", () => { addArrowImage(le) })
+            le.addEventListener("mouseleave", () => { hideArrowImage(le) })
+        })
+
+        lefts.forEach(left => {
+            left.addEventListener("click", () => { handleLeftClick(left) })
+        })
+
+        rights.forEach(right => {
+            right.addEventListener("click", () => { handleRightClick(right) })
+        })
+
+        removes.forEach(remove => {
+            remove.addEventListener("click", () => { handleRemoveClick(remove) })
+        })
+
+        i.forEach(im => {
+            im.addEventListener('click', () => { onImageClick(im) })
+        })
+
+        discButtons.forEach(button => {
+            button.addEventListener('click', () => { handleDiscClick(button) })
+        })
+
+        const addButtons = node.querySelectorAll(`.Add`)
+
+        addButtons.forEach(button => {
+            button.addEventListener("click", () => { handleAddButton(button) })
+        })
         document.querySelector('.product.searching').appendChild(node)
     })
     Array.from(document.querySelectorAll('.product')).forEach(p => {
