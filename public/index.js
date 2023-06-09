@@ -1,7 +1,7 @@
 const cartItems = document.querySelector('.cart-button')
 try { let temp = JSON.parse(atob(localStorage.getItem('cartB'))) } catch { localStorage.removeItem('cartB') }
 localStorage.setItem('curr', localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
-if(localStorage.getItem('curr')){
+if (localStorage.getItem('curr')) {
     document.querySelector('.curr').value = localStorage.getItem('curr')
 }
 
@@ -16,33 +16,177 @@ document.querySelector('.curr').onchange = e => {
     changeCurr()
 }
 
-function changeCurr(){
-    let a = {'CAD': 0, 'USD': 1, 'GBP': 2}
+function changeCurr() {
+    let a = { 'CAD': 0, 'USD': 1, 'GBP': 2 }
 
     let cards = Array.from(document.querySelectorAll('.card'))
     cards.forEach(card => {
         let amnt = card.querySelector('.amount')
+        if (!amnt) return
         amnt.textContent = allProducts[card.id].amounts[a[localStorage.getItem('curr')]] + ' ' + localStorage.getItem('curr')
     })
 }
 
 
 let allProducts = {}
+async function populate(entry) {
+    console.log(entry.target)
+    let b = allProducts[entry.target.id]
+    let imageContainer = document.createElement('div')
+    imageContainer.id = `img${b.name}`
+    imageContainer.classList.add('container')
+    imageContainer.style = "position: relative;"
+    document.querySelector(`#${b.name}`).append(imageContainer)
+
+    b.images.forEach(img => {
+        let i = new Image(220, 300)
+        i.classList.add('images')
+        i.loading = "lazy"
+        i.src = img
+        b.imageElements.push(i)
+    })
+
+    let img = new Image(220, 300);
+    img.src = b.images[0]
+    img.loading = 'lazy'
+    img.classList.add('images')
+    document.querySelector(`#img${b.name}`).append(img)
+
+    let imgl = new Image(25, 25);
+    imgl.src = "https://i.ibb.co/P4SPFWN/59209.png"
+    imgl.classList.add('left')
+    imgl.classList.add('hide')
+    imgl.style = "position: absolute; left: 5px; top: 45%;"
+    document.querySelector(`#img${b.name}`).append(imgl)
+
+    let imgr = new Image(25, 25);
+    imgr.src = "https://i.ibb.co/P4SPFWN/59209.png"
+    imgr.classList.add('right')
+    imgr.classList.add('hide')
+    imgr.style = "position: absolute; right: 5px; top: 45%;"
+    document.querySelector(`#img${b.name}`).append(imgr)
+
+    const nameD = document.createElement('div')
+    nameD.id = `D${b.name}`
+    nameD.classList.add('card2')
+    document.querySelector(`#${b.name}`).append(nameD)
+
+    const name1 = document.createElement('div')
+    name1.innerText = b.title + "   " + b.name
+    name1.classList.add('title')
+    document.querySelector(`#D${b.name}`).append(name1)
+
+    const disc = document.createElement('div')
+    disc.id = `disc${b.name}`
+    disc.classList.add("disc")
+    document.querySelector(`#D${b.name}`).append(disc)
+
+    const discButton = document.createElement('button')
+    discButton.classList.add('discButton')
+    discButton.innerText = 'Description'
+    document.querySelector(`#disc${b.name}`).appendChild(discButton)
+
+    const amount = document.createElement('div')
+    amount.classList.add('amount')
+    amount.innerText = b.amount + " " + "CAD"
+    document.querySelector(`#D${b.name}`).append(amount)
+
+    const cart = document.createElement('button')
+    cart.style = "margin: 10px;"
+    cart.innerText = "Wishlist"
+    cart.classList.add("Add")
+    cart.id = b.name
+    document.querySelector(`#D${b.name}`).append(cart)
+
+    const number = document.createElement('input')
+    number.classList.add('color')
+    number.placeholder = "Color"
+    document.querySelector(`#D${b.name}`).append(number)
+
+    const images = document.createElement('div')
+    images.style = "display: none;"
+    images.innerText = b.images
+    document.querySelector(`#D${b.name}`).append(images)
+
+    const Size = document.createElement('input')
+    Size.classList.add('number')
+    Size.classList.add('size')
+    Size.placeholder = "Size"
+    Size.type = "Number"
+    document.querySelector(`#D${b.name}`).append(Size)
+
+    const addInfo = document.createElement('textarea')
+    addInfo.placeholder = "Remarks"
+    addInfo.classList.add('add-info')
+    document.querySelector(`#D${b.name}`).append(addInfo)
+
+    const availSizes = document.createElement('p')
+    if (b.sizes != "") {
+        availSizes.innerText = 'Sizes: ' + b.sizes
+    } else {
+        availSizes.innerText = ""
+    }
+    availSizes.classList.add('availSizes')
+    document.querySelector(`#D${b.name}`).append(availSizes)
+    let imgUrls = []
+    for (let i = 0; i < allProducts[entry.target.id].imageElements.length; i++) {
+        let el = allProducts[entry.target.id].imageElements[i]
+        let s = await fetch(allProducts[entry.target.id].images[i])
+        s = await s.json()
+        imgUrls.push(s.url)
+        el.src = s.url
+    }
+    if (!entry.target.firstChild) return
+    entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
+    entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
+    observer.unobserve(entry.target)
+
+    let containers = document.querySelectorAll(`#${b.name} .container`)
+    let lefts = document.querySelectorAll(`#${b.name} .left`)
+    let rights = document.querySelectorAll(`#${b.name} .right`)
+    let removes = document.querySelectorAll(`#${b.name} .Remove`)
+    let i = document.querySelectorAll(`#${b.name} .images`)
+    let discButtons = document.querySelectorAll(`#${b.name} .discButton`)
+
+    containers.forEach(le => {
+        le.addEventListener("mouseover", () => { addArrowImage(le) })
+        le.addEventListener("mouseleave", () => { hideArrowImage(le) })
+    })
+
+    lefts.forEach(left => {
+        left.addEventListener("click", () => { handleLeftClick(left) })
+    })
+
+    rights.forEach(right => {
+        right.addEventListener("click", () => { handleRightClick(right) })
+    })
+
+    removes.forEach(remove => {
+        remove.addEventListener("click", () => { handleRemoveClick(remove) })
+    })
+
+    i.forEach(im => {
+        im.addEventListener('click', () => { onImageClick(im) })
+    })
+
+    discButtons.forEach(button => {
+        button.addEventListener('click', () => { handleDiscClick(button) })
+    })
+
+    const addButtons = document.querySelectorAll(`#${b.name} .Add`)
+
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => { handleAddButton(button) })
+    })
+    changeCurr()
+}
+
 async function handleIntersection(entries, observer) {
     console.log('obs')
     for (let entry of entries) {
         if (entry.intersectionRatio > 0) {
-            let imgUrls = []
-            for (let i = 0; i < allProducts[entry.target.id].imageElements.length; i++) {
-                let el = allProducts[entry.target.id].imageElements[i]
-                let s = await fetch(allProducts[entry.target.id].images[i])
-                s = await s.json()
-                imgUrls.push(s.url)
-                el.src = s.url
-            }
-            entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
-            entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
-            observer.unobserve(entry.target);
+            await populate(entry)
+            observer.unobserve(entry.target)
         }
     };
 };
@@ -51,6 +195,69 @@ const options = {
     threshold: 0.1
 };
 const observer = new IntersectionObserver(handleIntersection, options);
+
+async function cartInter(entries, observer) {
+    for (let entry of entries) {
+        if (entry.intersectionRatio > 0) {
+
+            console.log(entry.target)
+            let b = allProducts[entry.target.id]
+            let imgUrls = []
+            for (let i = 0; i < allProducts[entry.target.id].imageElements.length; i++) {
+                let el = allProducts[entry.target.id].imageElements[i]
+                let s = await fetch(allProducts[entry.target.id].images[i])
+                s = await s.json()
+                imgUrls.push(s.url)
+                el.src = s.url
+            }
+            if (!entry.target.firstChild) return
+            entry.target.firstChild.firstChild.src = allProducts[entry.target.id].imageElements[0].src
+            entry.target.firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.innerText = imgUrls
+
+            let containers = document.querySelectorAll(`#${b.name} .container`)
+            let lefts = document.querySelectorAll(`#${b.name} .left`)
+            let rights = document.querySelectorAll(`#${b.name} .right`)
+            let removes = document.querySelectorAll(`#${b.name} .Remove`)
+            let i = document.querySelectorAll(`#${b.name} .images`)
+            let discButtons = document.querySelectorAll(`#${b.name} .discButton`)
+
+            containers.forEach(le => {
+                le.addEventListener("mouseover", () => { addArrowImage(le) })
+                le.addEventListener("mouseleave", () => { hideArrowImage(le) })
+            })
+
+            lefts.forEach(left => {
+                left.addEventListener("click", () => { handleLeftClick(left) })
+            })
+
+            rights.forEach(right => {
+                right.addEventListener("click", () => { handleRightClick(right) })
+            })
+
+            removes.forEach(remove => {
+                remove.addEventListener("click", () => { handleRemoveClick(remove) })
+            })
+
+            i.forEach(im => {
+                im.addEventListener('click', () => { onImageClick(im) })
+            })
+
+            discButtons.forEach(button => {
+                button.addEventListener('click', () => { handleDiscClick(button) })
+            })
+
+            const addButtons = document.querySelectorAll(`#${b.name} .Add`)
+
+            addButtons.forEach(button => {
+                button.addEventListener("click", () => { handleAddButton(button) })
+            })
+            changeCurr()
+            observer.unobserve(entry.target)
+        }
+    };
+}
+const cartObserver = new IntersectionObserver(cartInter, options);
+
 
 function makeid() {
     var text = "";
@@ -284,7 +491,7 @@ function handleDiscClick(button) {
     document.body.appendChild(discContainer)
 }
 
-function handleAddButton(button){
+function handleAddButton(button) {
     if (imageOpen || discOpen) return
     try {
         let properties = []
@@ -312,39 +519,8 @@ function handleAddButton(button){
         const ne = new cartItem(properties[0], id, properties[1], properties[2], "cart-button", properties[3], properties[4], properties[5], remarks, allProducts[`${title.split(' ')[title.split(' ').length - 1]}`].amounts)
         ne.build()
         allProducts[id] = ne
-        observer.observe(document.querySelector(`#${id}`))
+        cartObserver.observe(document.querySelector(`#${id}`))
         updCartB()
-        containers = document.querySelectorAll(`#${id} .container`)
-        lefts = document.querySelectorAll(`#${id} .left`)
-        rights = document.querySelectorAll(`#${id} .right`)
-        images = document.querySelectorAll(`#${id} .images`)
-        removes = document.querySelectorAll(`#${id} .Remove`)
-        discButtons = document.querySelectorAll(`#${id} .discButton`)
-
-        containers.forEach(le => {
-            le.addEventListener("mouseover", () => { addArrowImage(le) })
-            le.addEventListener("mouseleave", () => { hideArrowImage(le) })
-        })
-
-        lefts.forEach(left => {
-            left.addEventListener("click", () => { handleLeftClick(left) })
-        })
-
-        rights.forEach(right => {
-            right.addEventListener("click", () => { handleRightClick(right) })
-        })
-
-        removes.forEach(remove => {
-            remove.addEventListener("click", () => { handleRemoveClick(remove) })
-        })
-
-        images.forEach(im => {
-            im.addEventListener('click', () => { onImageClick(im) })
-        })
-
-        discButtons.forEach(button => {
-            button.addEventListener('click', () => { handleDiscClick(button) })
-        })
     } catch (e) {
         let color = button.nextSibling.value
         let size = button.nextSibling.nextSibling.nextSibling.value
@@ -375,17 +551,13 @@ async function search() {
     Array.from(document.querySelectorAll('.product.searching .card')).forEach(p => {
         p.remove()
     })
-    products.forEach(p => {
-        let node = document.querySelector(`#${p}`).cloneNode(deep = true)
-
-        node.querySelector(`.container`).addEventListener("mouseover", () => { addArrowImage(node.querySelector(`.container`)) })
-        node.querySelector(`.container`).addEventListener("mouseleave", () => { hideArrowImage(node.querySelector(`.container`)) })
-        node.querySelector(`.left`).addEventListener("click", () => { handleLeftClick(node.querySelector(`.left`)) })
-        node.querySelector(`.right`).addEventListener("click", () => { handleRightClick(node.querySelector(`.right`)) })
-        node.querySelector(`.images`).addEventListener('click', () => { onImageClick(node.querySelector(`.images`)) })
-        node.querySelector(`.discButton`).addEventListener('click', () => { handleDiscClick(node.querySelector(`.discButton`)) })
-        node.querySelector(`.Add`).addEventListener('click', () => { handleAddButton(node.querySelector('.Add')) })
-        observer.observe(node)
+    products.forEach(async p => {
+        let node = document.querySelector(`#${p}`)
+        if (!node.innerHTML) {
+            await populate({ target: node })
+            observer.unobserve(node)
+        }
+        node = node.cloneNode(deep = true)
         document.querySelector('.product.searching').appendChild(node)
     })
     Array.from(document.querySelectorAll('.product')).forEach(p => {
@@ -482,111 +654,15 @@ class Product {
         this.title = title
         this.sizes = sizes
         this.imageElements = []
-        this.amounts = [Math.round(amount), Math.round(amount*0.75), Math.round(amount*0.6)]
+        this.amounts = [Math.round(amount), Math.round(amount * 0.75), Math.round(amount * 0.6)]
     }
 
-    build() {
+    async build() {
         const product = document.createElement('div')
         product.classList.add('card')
         product.id = this.name
         document.querySelector(`.${this.type}`).append(product)
 
-        let imageContainer = document.createElement('div')
-        imageContainer.id = `img${this.name}`
-        imageContainer.classList.add('container')
-        imageContainer.style = "position: relative;"
-        document.querySelector(`#${this.name}`).append(imageContainer)
-
-        this.images.forEach(img => {
-            let i = new Image(220, 300)
-            i.classList.add('images')
-            i.loading = "lazy"
-            i.src = img
-            this.imageElements.push(i)
-        })
-
-        let img = new Image(220, 300);
-        img.src = this.images[0]
-        img.loading = 'lazy'
-        img.classList.add('images')
-        document.querySelector(`#img${this.name}`).append(img)
-
-        let imgl = new Image(25, 25);
-        imgl.src = "https://i.ibb.co/P4SPFWN/59209.png"
-        imgl.classList.add('left')
-        imgl.classList.add('hide')
-        imgl.style = "position: absolute; left: 5px; top: 45%;"
-        document.querySelector(`#img${this.name}`).append(imgl)
-
-        let imgr = new Image(25, 25);
-        imgr.src = "https://i.ibb.co/P4SPFWN/59209.png"
-        imgr.classList.add('right')
-        imgr.classList.add('hide')
-        imgr.style = "position: absolute; right: 5px; top: 45%;"
-        document.querySelector(`#img${this.name}`).append(imgr)
-
-        const nameD = document.createElement('div')
-        nameD.id = `D${this.name}`
-        nameD.classList.add('card2')
-        document.querySelector(`#${this.name}`).append(nameD)
-
-        const name1 = document.createElement('div')
-        name1.innerText = this.title + "   " + this.name
-        name1.classList.add('title')
-        document.querySelector(`#D${this.name}`).append(name1)
-
-        const disc = document.createElement('div')
-        disc.id = `disc${this.name}`
-        disc.classList.add("disc")
-        document.querySelector(`#D${this.name}`).append(disc)
-
-        const discButton = document.createElement('button')
-        discButton.classList.add('discButton')
-        discButton.innerText = 'Description'
-        document.querySelector(`#disc${this.name}`).appendChild(discButton)
-
-        const amount = document.createElement('div')
-        amount.classList.add('amount')
-        amount.innerText = this.amount + " " + "CAD"
-        document.querySelector(`#D${this.name}`).append(amount)
-
-        const cart = document.createElement('button')
-        cart.style = "margin: 10px;"
-        cart.innerText = "Wishlist"
-        cart.classList.add("Add")
-        cart.id = this.name
-        document.querySelector(`#D${this.name}`).append(cart)
-
-        const number = document.createElement('input')
-        number.classList.add('color')
-        number.placeholder = "Color"
-        document.querySelector(`#D${this.name}`).append(number)
-
-        const images = document.createElement('div')
-        images.style = "display: none;"
-        images.innerText = this.images
-        document.querySelector(`#D${this.name}`).append(images)
-
-        const Size = document.createElement('input')
-        Size.classList.add('number')
-        Size.classList.add('size')
-        Size.placeholder = "Size"
-        Size.type = "Number"
-        document.querySelector(`#D${this.name}`).append(Size)
-
-        const addInfo = document.createElement('textarea')
-        addInfo.placeholder = "Remarks"
-        addInfo.classList.add('add-info')
-        document.querySelector(`#D${this.name}`).append(addInfo)
-
-        const availSizes = document.createElement('p')
-        if (this.sizes != "") {
-            availSizes.innerText = 'Sizes: ' + this.sizes
-        } else {
-            availSizes.innerText = ""
-        }
-        availSizes.classList.add('availSizes')
-        document.querySelector(`#D${this.name}`).append(availSizes)
     }
 }
 
@@ -621,6 +697,7 @@ class cartItem {
         product.classList.add('card')
         product.id = this.name
         document.querySelector(`.checkout`).insertAdjacentElement("beforebegin", product)
+
 
         let imageContainer = document.createElement('div')
         imageContainer.id = `img${this.name}`
@@ -704,7 +781,7 @@ class cartItem {
         items.classList.add('colorOfItems')
         items.style = "margin: 10px;"
         items.innerText = `Color: ${this.color}
-        Size: ${this.size}`
+    Size: ${this.size}`
         document.querySelector(`#D${this.name}`).append(items)
 
         const remarks = document.createElement('textarea')
@@ -752,50 +829,12 @@ getProducts().then(async products => {
                 let n = new cartItem(prod[1] + ' ' + prod[0], id, item.description, prod[3], item.type, item.images, prod[2], prod[4], prod[5], item.amounts)
                 n.build()
                 allProducts[id] = n
-                observer.observe(document.querySelector(`#${id}`))
+                cartObserver.observe(document.querySelector(`#${id}`))
             }
         })
         updCartB()
     }
-    let containers = document.querySelectorAll('.container')
-    let lefts = document.querySelectorAll('.left')
-    let rights = document.querySelectorAll('.right')
-    let removes = document.querySelectorAll('.Remove')
-    let images = document.querySelectorAll('.images')
-    let discButtons = document.querySelectorAll('.discButton')
-
-    containers.forEach(le => {
-        le.addEventListener("mouseover", () => { addArrowImage(le) })
-        le.addEventListener("mouseleave", () => { hideArrowImage(le) })
-    })
-
-    lefts.forEach(left => {
-        left.addEventListener("click", () => { handleLeftClick(left) })
-    })
-
-    rights.forEach(right => {
-        right.addEventListener("click", () => { handleRightClick(right) })
-    })
-
-    removes.forEach(remove => {
-        remove.addEventListener("click", () => { handleRemoveClick(remove) })
-    })
-
-    images.forEach(im => {
-        im.addEventListener('click', () => { onImageClick(im) })
-    })
-
-    discButtons.forEach(button => {
-        button.addEventListener('click', () => { handleDiscClick(button) })
-    })
-
-    const addButtons = document.querySelectorAll('.Add')
-
-    addButtons.forEach(button => {
-        button.addEventListener("click", () => {handleAddButton(button)})
-    })
     changeCurr()
-
     window.addEventListener("beforeunload", () => {
         updCartB()
     })
