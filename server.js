@@ -12,12 +12,15 @@ const mongoose = require('mongoose')
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3")
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const crypto = require('crypto')
+var compression = require('compression')
+
 dotenv.config()
 let visited = Number(fs.readFileSync(path.join(__dirname, '/visited.txt'), 'utf8'))
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(compression())
 
 const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
