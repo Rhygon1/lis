@@ -30,6 +30,7 @@ function changeCurr() {
 
 let allProducts = {}
 async function populate(entry) {
+    if(entry.target.innerHTML) return
     console.log(entry.target)
     let b = allProducts[entry.target.id]
     let imageContainer = document.createElement('div')
