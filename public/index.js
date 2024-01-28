@@ -722,7 +722,7 @@ class cartItem {
         const product = document.createElement('div')
         product.classList.add('card')
         product.id = this.name
-        document.querySelector(`.checkout`).insertAdjacentElement("beforebegin", product)
+        document.querySelector(`.checkout`).insertAdjacentElement("afterend", product)
 
 
         let imageContainer = document.createElement('div')
