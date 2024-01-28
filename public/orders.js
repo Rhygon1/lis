@@ -149,14 +149,14 @@ getOrders().then(async orders => {
 
             const nOfitems = document.createElement('div')
             nOfitems.classList.add('color')
-            nOfitems.style = "margin: 10px;"
+            nOfitems.style = "display: none;"
             nOfitems.innerText = `Color: ${item.Color} 
             Size: ${item.Size}`
             nameD.append(nOfitems)
 
             const remarks = document.createElement('textarea')
             remarks.classList.add('remarks')
-            remarks.style = "margin: 10px;"
+            remarks.style = "display: none;"
             remarks.readOnly = true
             remarks.value = `Remarks: ${item.Remarks}`
             nameD.append(remarks)

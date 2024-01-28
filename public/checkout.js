@@ -6,22 +6,6 @@ let ordered = false
 data.forEach((dp, i) => {
     p = decodeURIComponent(dp)
     let el;
-    if((i + 1) % 6 != 0){
-        el = document.createElement('div')
-        el.classList.add('grid_item')
-        el.innerHTML = p
-    } else {
-        el = document.createElement('textarea')
-        el.readOnly = true
-        el.classList.add('grid_item')
-        el.innerText = p
-    }
-    document.querySelector('.grid').append(el)
-    if ((i + 3) % 6 == 0) {
-        console.log(Number(p.split(' ')[0]))
-        total += Number(p.split(' ')[0])
-        el.innerText = Number(p.split(' ')[0]) + " " + (localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
-    }
     if ((i + 6) % 6 == 0 || (i + 4) % 6 == 0 || (i + 2) % 6 == 0) {
         order.push(p)
     }
@@ -30,18 +14,21 @@ data.forEach((dp, i) => {
         orders.push(order)
         order = []
     }
-    if ((i + 5) % 6 == 0 || (i + 6) % 6 == 0) {
-        el.classList.add('left-align')
+    if((i - 2) % 6 == 0 || (i - 4) % 6 == 0 || (i - 5) % 6 == 0){
+        return
+    }
+    el = document.createElement('div')
+    el.classList.add('grid_item')
+    el.innerHTML = p
+    document.querySelector('.grid').append(el)
+    if ((i - 3) % 6 == 0) {
+        console.log(Number(p.split(' ')[0]))
+        total += Number(p.split(' ')[0])
+        el.innerText = Number(p.split(' ')[0]) + " " + (localStorage.getItem('curr') ? localStorage.getItem('curr') : 'CAD')
     }
 })
 let el = document.createElement('p')
 el.classList.add('grid_item')
-el.innerText = ''
-document.querySelector('.grid').append(el)
-
-el = document.createElement('p')
-el.classList.add('grid_item')
-el.classList.add('total')
 el.innerText = ''
 document.querySelector('.grid').append(el)
 

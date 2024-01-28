@@ -101,6 +101,7 @@ async function populate(entry) {
 
     const number = document.createElement('input')
     number.classList.add('color')
+    number.style = "display: none;"
     number.placeholder = "Color"
     document.querySelector(`#D${b.name}`).append(number)
 
@@ -112,6 +113,7 @@ async function populate(entry) {
     const Size = document.createElement('input')
     Size.classList.add('number')
     Size.classList.add('size')
+    Size.style = "display: none;"
     Size.placeholder = "Size"
     Size.type = "Number"
     document.querySelector(`#D${b.name}`).append(Size)
@@ -119,6 +121,7 @@ async function populate(entry) {
     const addInfo = document.createElement('textarea')
     addInfo.placeholder = "Remarks"
     addInfo.classList.add('add-info')
+    addInfo.style = "display: none;"
     document.querySelector(`#D${b.name}`).append(addInfo)
 
     const availSizes = document.createElement('p')
@@ -494,7 +497,6 @@ function handleDiscClick(button) {
 
 function handleAddButton(button) {
     if (imageOpen || discOpen) return
-    try {
         let properties = []
         let title = button.previousSibling.previousSibling.previousSibling.innerText
         properties.push(title)
@@ -507,9 +509,6 @@ function handleAddButton(button) {
         let color = button.nextSibling.value
         let size = button.nextSibling.nextSibling.nextSibling.value
         let remarks = button.nextSibling.nextSibling.nextSibling.nextSibling.value
-        if (color == "" || size < 1 || size == '' || remarks.length > 100 || size > 1000 || color.length > 50) {
-            throw (console.error())
-        }
         button.nextSibling.value = ""
         button.nextSibling.nextSibling.nextSibling.value = ""
         button.nextSibling.nextSibling.nextSibling.nextSibling.value = ""
@@ -522,19 +521,8 @@ function handleAddButton(button) {
         allProducts[id] = ne
         cartObserver.observe(document.querySelector(`#${id}`))
         updCartB()
-    } catch (e) {
-        let color = button.nextSibling.value
-        let size = button.nextSibling.nextSibling.nextSibling.value
-        if (button.nextSibling.nextSibling.nextSibling.nextSibling.value.length > 99) {
-            alert("You can only add 100 characters in additional info")
-        } else if (color == '' || size > 999) {
-            alert('You have to add a color and make sure the size is less than 999')
-        } else {
-            alert("Please enter the size and color")
-        }
-        console.log(e)
     }
-}
+
 
 const pro = document.querySelectorAll('.product')
 const buttons = document.querySelectorAll('.nav-button')
@@ -807,6 +795,7 @@ class cartItem {
         number.classList.add('number')
         number.classList.add('hiden')
         number.placeholder = "No. of items"
+        number.style = "display: none;"
         number.type = "number"
         document.querySelector(`#D${this.name}`).append(number)
 
@@ -817,7 +806,7 @@ class cartItem {
 
         const items = document.createElement('div')
         items.classList.add('colorOfItems')
-        items.style = "margin: 10px;"
+        items.style = "display: none;"
         items.innerText = `Color: ${this.color}
     Size: ${this.size}`
         document.querySelector(`#D${this.name}`).append(items)
@@ -825,7 +814,7 @@ class cartItem {
         const remarks = document.createElement('textarea')
         remarks.classList.add('remarks')
         remarks.readOnly = true
-        remarks.style = "margin: 10px;"
+        remarks.style = "display: none;"
         remarks.innerText = `Remarks: ${this.remarks}`
         document.querySelector(`#D${this.name}`).append(remarks)
 

@@ -122,7 +122,7 @@ label{
   margin-top: 2%;
   width: 80%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 50px;
   grid-gap: 10px;
 }
@@ -174,6 +174,10 @@ button:hover{
 .home{
   height: 6vh;
   position: absolute;
+}
+
+.hidden {
+  display: none;
 }
 
 
